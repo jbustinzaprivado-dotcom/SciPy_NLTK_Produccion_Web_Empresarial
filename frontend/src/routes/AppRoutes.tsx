@@ -10,6 +10,7 @@ import Clientes     from '../pages/Clientes';
 import Reportes     from '../pages/Reportes';
 import Login        from '../pages/Login';
 import { getToken }  from '../services/http';
+import Categorias   from '../pages/Categorias';
 
 function RutaProtegida({ children }: { children: React.ReactElement }) {
   if (!getToken()) return <Navigate to="/login" replace />;
@@ -28,6 +29,7 @@ export default function AppRoutes() {
         <Route path="/comentarios"  element={<Comentarios />}  />
         <Route path="/analisis-nlp" element={<AnalisisNLP />}  />
         <Route path="/clientes"     element={<Clientes />}     />
+        <Route path="/categorias"   element={<Categorias />} />
         <Route path="/reportes"     element={<Reportes />}     />
         <Route path="*"             element={<Navigate to="/dashboard" replace />} />
       </Route>

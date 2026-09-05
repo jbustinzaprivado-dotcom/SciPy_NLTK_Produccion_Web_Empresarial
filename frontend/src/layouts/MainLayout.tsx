@@ -9,6 +9,7 @@ const nav = [
   { to: '/analisis-nlp', label: 'Analisis NLP'  },
   { to: '/clientes',     label: 'Clientes'      },
   { to: '/reportes',     label: 'Reportes'      },
+  { to: '/categorias',   label: 'Categorias'    },
 ];
 
 const themes = [
@@ -34,7 +35,7 @@ export default function MainLayout() {
                 to={item.to}
                 className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
               >
-                <span className="nav-icon">{['⌂','◈','↗','✦','◌','♙','▤'][nav.indexOf(item)]}</span><span className="nav-label">{item.label}</span>
+                <span className="nav-icon">{['⌂','◈','↗','✦','◌','♙','▤','☰'][nav.indexOf(item)]}</span><span className="nav-label">{item.label}</span>
               </NavLink>
             ))}
           </nav>
