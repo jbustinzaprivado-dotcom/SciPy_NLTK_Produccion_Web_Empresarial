@@ -16,6 +16,7 @@ from scipy.interpolate import interp1d
 from app.api.categorias import router as categorias_router
 from app.api.auth import router as auth_router
 from app.api.auditoria import router as auditoria_router
+from psycopg.types.json import Jsonb
 
 app = FastAPI(
     title="Empresa Inteligente - API",
@@ -68,8 +69,9 @@ def root():
     }
 
 # Ejercicio 2: Optimización de recursos con scipy.optimize.minimize
-@app.post("/api/optimizacion")
-def optimizar_costos(input_data: OptimizacionInput):
+# Ejercicio 2: Optimización de recursos con scipy.optimize.minimize
+@app.post("/api/optimizacion", dependencies=[Depends(requerir_usuario)])
+def optimizar_costos(input_data: OptimizacionInput, db=Depends(get_connection)):
     # Función de costo: 80*recurso_a + 50*recurso_b + 10*(recurso_a-3)**2
     def costo(x):
         a, b = x
@@ -89,7 +91,7 @@ def optimizar_costos(input_data: OptimizacionInput):
     recurso_b = float(res.x[1])
     costo_opt = float(res.fun)
 
-    return {
+    resultado = {
         "recurso_a": round(recurso_a, 2),
         "recurso_b": round(recurso_b, 2),
         "costo_optimo": round(costo_opt, 2),
@@ -99,7 +101,26 @@ def optimizar_costos(input_data: OptimizacionInput):
         "mensaje": "Optimización exitosa mediante scipy.optimize.minimize (SLSQP)"
     }
 
-# Ejercicio 3: Interpolación con scipy.interpolate.interp1d
+    # Antes este resultado se calculaba y se perdía; ahora queda guardado
+    # para poder mostrarlo despues en un historial.
+    db.execute(
+        "INSERT INTO optimizaciones(nombre, parametros_entrada, resultado, costo_inicial, costo_optimizado, estado) "
+        "VALUES (%s, %s, %s, %s, %s, 'completado')",
+        ("Optimización de recursos", Jsonb(input_data.model_dump()), Jsonb(resultado), costo_ini, costo_opt),
+    )
+    db.commit()
+
+    return resultado
+
+
+@app.get("/api/optimizacion/historial", dependencies=[Depends(requerir_usuario)])
+def historial_optimizacion(limit: int = Query(20, ge=1, le=100), db=Depends(get_connection)):
+    return db.execute(
+        "SELECT id::text, nombre, parametros_entrada, resultado, costo_inicial, costo_optimizado, estado, created_at "
+        "FROM optimizaciones ORDER BY id DESC LIMIT %s",
+        (limit,),
+    ).fetchall()
+
 # Ejercicio 3: Interpolación con scipy.interpolate.interp1d
 # Antes usaba "ventas mensuales" de ejemplo (el PDF trae ese caso genérico),
 # pero este proyecto no tiene tabla de ventas. Lo adaptamos al dato real que

@@ -1,11 +1,28 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { requestJson } from '../services/http';
 
 interface ResultadoOpt {
   recurso_a: number;
   recurso_b: number;
   costo_optimo: number;
   costo_inicial?: number;
+  ahorro_obtenido?: number;
   exito: boolean;
+}
+
+// Forma de cada fila que devuelve GET /api/optimizacion/historial
+interface HistorialItem {
+  id: string;
+  nombre: string;
+  resultado: {
+    recurso_a: number;
+    recurso_b: number;
+    costo_optimo: number;
+  };
+  costo_inicial: number;
+  costo_optimizado: number;
+  estado: string;
+  created_at: string;
 }
 
 export default function Optimizacion() {
@@ -17,19 +34,39 @@ export default function Optimizacion() {
 
   const [error, setError] = useState('');
 
+  // Historial persistido en la tabla `optimizaciones`
+  const [historial, setHistorial] = useState<HistorialItem[]>([]);
+  const [cargandoHistorial, setCargandoHistorial] = useState(true);
+
+  // Trae el historial guardado en Supabase al entrar a la pagina
+  const cargarHistorial = async () => {
+    setCargandoHistorial(true);
+    try {
+      const data = await requestJson<HistorialItem[]>('/api/optimizacion/historial');
+      setHistorial(data);
+    } catch {
+      // Si falla, simplemente se deja el historial vacio (no bloquea el resto de la pagina)
+    } finally {
+      setCargandoHistorial(false);
+    }
+  };
+
+  useEffect(() => {
+    cargarHistorial();
+  }, []);
+
   const calcular = async (e: React.FormEvent) => {
     e.preventDefault();
     setCargando(true); setResultado(null); setError('');
     try {
-      const r = await fetch('/api/optimizacion', {
+      const data = await requestJson<ResultadoOpt>('/api/optimizacion', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ capacidad_minima: capacidad, costo_base_a: costoA, costo_base_b: costoB }),
       });
-      if (!r.ok) throw new Error('offline');
-      const data: ResultadoOpt = await r.json();
       if (!data.exito) throw new Error('Sin solución válida');
       setResultado(data);
+      // Cada calculo nuevo queda guardado en la BD, asi que refrescamos la tabla de historial
+      cargarHistorial();
     } catch {
       setError('No se obtuvo una optimización válida. Revisa los parámetros y la conexión.');
     } finally {
@@ -98,6 +135,43 @@ export default function Optimizacion() {
           </div>
         )}
       </div>
+
+      {/* Historial persistido (tabla `optimizaciones` en Supabase) */}
+      <div style={card}>
+        <h3 style={sectionH3}>Historial de Optimizaciones</h3>
+        {cargandoHistorial ? (
+          <p style={p}>Cargando historial...</p>
+        ) : historial.length === 0 ? (
+          <p style={p}>Todavía no hay optimizaciones guardadas.</p>
+        ) : (
+          <div style={{ overflowX: 'auto', marginTop: '0.5rem' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
+              <thead>
+                <tr>
+                  <th style={th}>Fecha</th>
+                  <th style={th}>Recurso A</th>
+                  <th style={th}>Recurso B</th>
+                  <th style={th}>Costo Inicial</th>
+                  <th style={th}>Costo Optimo</th>
+                  <th style={th}>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                {historial.map((h) => (
+                  <tr key={h.id}>
+                    <td style={td}>{new Date(h.created_at).toLocaleString()}</td>
+                    <td style={td}>{h.resultado?.recurso_a}</td>
+                    <td style={td}>{h.resultado?.recurso_b}</td>
+                    <td style={td}>S/ {h.costo_inicial}</td>
+                    <td style={td}>S/ {h.costo_optimizado}</td>
+                    <td style={td}>{h.estado}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -120,3 +194,5 @@ const p: React.CSSProperties         = { margin: '0.4rem 0', fontSize: '0.85rem'
 const labelSt: React.CSSProperties   = { display: 'flex', flexDirection: 'column', gap: '0.25rem', fontSize: '0.82rem', fontWeight: 600, color: '#475569' };
 const input: React.CSSProperties     = { padding: '0.45rem 0.6rem', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '0.85rem', width: '100%', boxSizing: 'border-box', fontWeight: 400 };
 const btnDark: React.CSSProperties   = { backgroundColor: '#0f172a', color: '#fff', border: 'none', padding: '0.55rem', borderRadius: '4px', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' };
+const th: React.CSSProperties        = { textAlign: 'left', padding: '0.5rem 0.6rem', borderBottom: '2px solid #e2e8f0', color: '#475569', fontWeight: 600 };
+const td: React.CSSProperties        = { padding: '0.5rem 0.6rem', borderBottom: '1px solid #f1f5f9', color: '#334155' };
