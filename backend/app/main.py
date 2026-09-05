@@ -1,4 +1,7 @@
-from fastapi import FastAPI, Query, Request
+from fastapi import FastAPI, Query, Request, Depends
+from datetime import date, timedelta
+from app.database.connection import get_connection
+from app.api.deps import requerir_usuario
 from fastapi.responses import JSONResponse
 import logging
 import psycopg
@@ -95,59 +98,81 @@ def optimizar_costos(input_data: OptimizacionInput):
     }
 
 # Ejercicio 3: Interpolación con scipy.interpolate.interp1d
-@app.get("/api/scipy/interpolacion")
-def get_interpolacion():
-    meses_conocidos = np.array([1, 3, 4, 6])
-    ventas_conocidas = np.array([12000, 14500, 15000, 18000], dtype=float)
+# Ejercicio 3: Interpolación con scipy.interpolate.interp1d
+# Antes usaba "ventas mensuales" de ejemplo (el PDF trae ese caso genérico),
+# pero este proyecto no tiene tabla de ventas. Lo adaptamos al dato real que
+# sí existe acá: el tiempo promedio de atención por día, rellenando los días
+# sin registros mediante interpolación lineal.
+@app.get("/api/scipy/interpolacion", dependencies=[Depends(requerir_usuario)])
+def get_interpolacion(dias: int = Query(14, ge=2, le=90), db=Depends(get_connection)):
+    hoy = date.today()
+    desde = hoy - timedelta(days=dias - 1)  # rango de N días hacia atrás, incluyendo hoy
 
-    f = interp1d(meses_conocidos, ventas_conocidas, kind="linear")
-    feb_estimado = float(f(2))
-    may_estimado = float(f(5))
+    # Traemos el promedio de tiempo_minutos por día, solo para los días que SÍ tienen registros
+    filas = db.execute(
+        "SELECT fecha, avg(tiempo_minutos)::float8 AS promedio FROM tiempos_atencion "
+        "WHERE fecha BETWEEN %s AND %s GROUP BY fecha ORDER BY fecha",
+        (desde, hoy),
+    ).fetchall()
 
-    puntos = [
-        {"mes": "Enero", "mes_num": 1, "ventas": 12000.0, "tipo": "real"},
-        {"mes": "Febrero", "mes_num": 2, "ventas": round(feb_estimado, 2), "tipo": "estimado"},
-        {"mes": "Marzo", "mes_num": 3, "ventas": 14500.0, "tipo": "real"},
-        {"mes": "Abril", "mes_num": 4, "ventas": 15000.0, "tipo": "real"},
-        {"mes": "Mayo", "mes_num": 5, "ventas": round(may_estimado, 2), "tipo": "estimado"},
-        {"mes": "Junio", "mes_num": 6, "ventas": 18000.0, "tipo": "real"}
-    ]
+    reales = {fila["fecha"]: fila["promedio"] for fila in filas}
+
+    # Con menos de 2 puntos reales no se puede trazar ninguna interpolación
+    if len(reales) < 2:
+        return {
+            "puntos": [],
+            "metodo": "scipy.interpolate.interp1d(kind='linear')",
+            "explicacion": "Se necesitan al menos 2 días con atenciones registradas en el rango para poder interpolar los huecos.",
+        }
+
+    # scipy.interpolate necesita números, no fechas: convertimos cada fecha
+    # conocida a "cuántos días pasaron desde el inicio del rango" (0, 1, 2...)
+    fechas_conocidas = sorted(reales.keys())
+    x_conocidos = [(f - desde).days for f in fechas_conocidas]
+    y_conocidos = [reales[f] for f in fechas_conocidas]
+
+    f = interp1d(x_conocidos, y_conocidos, kind="linear")
+
+    puntos = []
+    for i in range(dias):
+        fecha = desde + timedelta(days=i)
+        if fecha in reales:
+            puntos.append({"fecha": str(fecha), "tiempo_promedio": round(reales[fecha], 2), "tipo": "real"})
+        elif x_conocidos[0] <= i <= x_conocidos[-1]:
+            # Día sin registro, pero dentro del rango cubierto por datos reales: se estima
+            estimado = float(f(i))
+            puntos.append({"fecha": str(fecha), "tiempo_promedio": round(estimado, 2), "tipo": "estimado"})
+        # Los días fuera del rango de datos reales (antes del primero o después
+        # del último) se omiten: interp1d no puede extrapolar con confianza ahí.
 
     return {
         "puntos": puntos,
-        "meses_estimados": [f"Febrero (Mes 2: ${round(feb_estimado, 2):,})", f"Mayo (Mes 5: ${round(may_estimado, 2):,})"],
         "metodo": "scipy.interpolate.interp1d(kind='linear')",
-        "explicacion": "Los valores de Febrero y Mayo se calcularon por interpolación lineal matemática a partir de los datos conocidos de Enero, Marzo, Abril y Junio. Deben presentarse claramente como estimados analíticos y no como hechos consumados."
+        "explicacion": "Los días sin atenciones registradas dentro del rango se estiman por interpolación lineal a partir de los días con datos reales más cercanos. Deben presentarse como estimados, no como hechos consumados.",
     }
+
 
 # ==========================================
 # ENDPOINTS NLTK / NLP
 # ==========================================
 # Ejercicio 4: Análisis de palabras clave
-@app.get("/api/comentarios/keywords")
-def get_keywords():
-    try:
-        import nltk
-        from nltk.tokenize import word_tokenize
-        from nltk.corpus import stopwords
-        from collections import Counter
+@app.get("/api/comentarios/keywords", dependencies=[Depends(requerir_usuario)])
+def get_keywords(db=Depends(get_connection)):
+    from nltk.tokenize import word_tokenize
+    from nltk.corpus import stopwords
+    from collections import Counter
 
-        texto = "El servicio fue rápido y el equipo brindó una excelente atención a los clientes con soluciones inmediatas"
-        tokens = word_tokenize(texto.lower(), language="spanish")
-        stop = set(stopwords.words("spanish"))
-        limpios = [t for t in tokens if t.isalpha() and t not in stop]
-        frecuentes = Counter(limpios).most_common(7)
+    filas = db.execute("SELECT contenido FROM comentarios ORDER BY id DESC LIMIT 200").fetchall()
+    texto = " ".join(fila["contenido"] for fila in filas)
 
-        keywords = [{"palabra": pal, "frecuencia": frec * 2 + 1} for pal, frec in frecuentes]
-    except Exception:
-        keywords = [
-            {"palabra": "servicio", "frecuencia": 12},
-            {"palabra": "atención", "frecuencia": 9},
-            {"palabra": "rápido", "frecuencia": 7},
-            {"palabra": "excelente", "frecuencia": 6},
-            {"palabra": "soporte", "frecuencia": 5},
-            {"palabra": "equipo", "frecuencia": 4},
-        ]
+    if not texto.strip():
+        return {"keywords": [], "total_palabras_clave": 0}
+
+    tokens = word_tokenize(texto.lower(), language="spanish")
+    stop = set(stopwords.words("spanish"))
+    limpios = [t for t in tokens if t.isalpha() and t not in stop]
+    frecuentes = Counter(limpios).most_common(7)
+    keywords = [{"palabra": pal, "frecuencia": frec} for pal, frec in frecuentes]
 
     return {"keywords": keywords, "total_palabras_clave": len(keywords)}
 
