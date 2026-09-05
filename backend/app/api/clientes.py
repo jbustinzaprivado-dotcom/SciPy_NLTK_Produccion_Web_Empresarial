@@ -2,8 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from app.database.connection import get_connection
 from app.database.models import ClienteNuevo
 from app.services.auditoria_service import registrar
+from app.api.deps import requerir_usuario
 
-router = APIRouter(prefix="/api/clientes", tags=["Clientes"])
+router = APIRouter(prefix="/api/clientes", tags=["Clientes"], dependencies=[Depends(requerir_usuario)])
 SELECT_CLIENTES = """SELECT c.id::text, c.nombre, c.empresa, c.correo, c.telefono,
     count(t.id)::int AS total_atenciones,
     coalesce(avg(t.tiempo_minutos), 0)::float8 AS tiempo_promedio_min

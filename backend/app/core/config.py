@@ -8,3 +8,5 @@ def database_url():
     if not value:
         raise RuntimeError("Configura DATABASE_URL antes de iniciar el backend.")
     return value
+def secret_key() -> str:
+    return os.environ.get("SECRET_KEY", "clave-de-desarrollo-cambiar-en-produccion")

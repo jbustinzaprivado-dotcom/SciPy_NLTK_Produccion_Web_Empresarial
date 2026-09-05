@@ -4,8 +4,9 @@ from app.database.connection import get_connection
 from app.database.models import ComentarioNuevo
 from app.services.nltk_service import clasificar_texto
 from app.services.auditoria_service import registrar
+from app.api.deps import requerir_usuario
 
-router = APIRouter(prefix="/api/comentarios", tags=["Comentarios"])
+router = APIRouter(prefix="/api/comentarios", tags=["Comentarios"], dependencies=[Depends(requerir_usuario)])
 SELECT_COMENTARIOS = """
 SELECT c.id::text, c.cliente_id, cl.nombre AS cliente_nombre, c.fecha,
        c.contenido AS comentario, c.estado, c.categoria, c.procesado,

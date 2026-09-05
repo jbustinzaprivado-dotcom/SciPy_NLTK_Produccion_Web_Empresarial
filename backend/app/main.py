@@ -11,6 +11,7 @@ import numpy as np
 from scipy.optimize import minimize
 from scipy.interpolate import interp1d
 from app.api.categorias import router as categorias_router
+from app.api.auth import router as auth_router
 
 app = FastAPI(
     title="Empresa Inteligente - API",
@@ -22,6 +23,7 @@ app.include_router(metricas_router)
 app.include_router(clientes_router)
 app.include_router(comentarios_router)
 app.include_router(categorias_router)
+app.include_router(auth_router)
 
 @app.exception_handler(psycopg.Error)
 async def database_error(request: Request, exc: psycopg.Error):

@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends
 from app.database.connection import get_connection
 from app.database.models import CategoriaNueva
 from app.services.auditoria_service import registrar
+from app.api.deps import requerir_usuario
 
-router = APIRouter(prefix="/api/categorias", tags=["Categorías"])
-
+router = APIRouter(prefix="/api/categorias", tags=["Categorías"], dependencies=[Depends(requerir_usuario)])
 
 @router.get("")
 def listar_categorias(db=Depends(get_connection)):

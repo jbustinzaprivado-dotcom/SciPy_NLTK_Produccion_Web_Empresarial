@@ -7,8 +7,9 @@ from pydantic import BaseModel, Field
 from psycopg.types.json import Jsonb
 from app.database.connection import get_connection
 from app.services.scipy_service import calcular_estadisticas, VERSION
+from app.api.deps import requerir_usuario
 
-router = APIRouter(prefix='/api', tags=['Estadísticas'])
+router = APIRouter(prefix='/api', tags=['Estadísticas'], dependencies=[Depends(requerir_usuario)])
 
 
 class TiemposInput(BaseModel):

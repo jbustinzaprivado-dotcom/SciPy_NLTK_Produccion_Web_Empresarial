@@ -8,11 +8,19 @@ import Comentarios  from '../pages/Comentarios';
 import AnalisisNLP  from '../pages/AnalisisNLP';
 import Clientes     from '../pages/Clientes';
 import Reportes     from '../pages/Reportes';
+import Login        from '../pages/Login';
+import { getToken }  from '../services/http';
+
+function RutaProtegida({ children }: { children: React.ReactElement }) {
+  if (!getToken()) return <Navigate to="/login" replace />;
+  return children;
+}
 
 export default function AppRoutes() {
   return (
     <Routes>
-      <Route element={<MainLayout />}>
+      <Route path="/login" element={<Login />} />
+      <Route element={<RutaProtegida><MainLayout /></RutaProtegida>}>
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard"    element={<Dashboard />}    />
         <Route path="/metricas"     element={<Metricas />}     />
