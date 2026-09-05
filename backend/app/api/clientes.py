@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from app.database.connection import get_connection
 from app.database.models import ClienteNuevo
+from app.services.auditoria_service import registrar
 
 router = APIRouter(prefix="/api/clientes", tags=["Clientes"])
 SELECT_CLIENTES = """SELECT c.id::text, c.nombre, c.empresa, c.correo, c.telefono,
@@ -25,5 +26,6 @@ def obtener_cliente(cliente_id: int, db=Depends(get_connection)):
 @router.post("", status_code=201)
 def crear_cliente(data: ClienteNuevo, db=Depends(get_connection)):
     result = db.execute("INSERT INTO clientes(nombre, empresa, correo, telefono) VALUES (%s, %s, %s, %s) RETURNING id::text, nombre, empresa, correo, telefono", (data.nombre, data.empresa, data.correo, data.telefono)).fetchone()
+    registrar(db, "crear_cliente", "clientes", int(result["id"]), {"nombre": data.nombre})
     db.commit()
     return {**result, "total_atenciones": 0, "tiempo_promedio_min": 0}

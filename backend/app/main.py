@@ -10,6 +10,7 @@ from pydantic import BaseModel
 import numpy as np
 from scipy.optimize import minimize
 from scipy.interpolate import interp1d
+from app.api.categorias import router as categorias_router
 
 app = FastAPI(
     title="Empresa Inteligente - API",
@@ -20,7 +21,7 @@ app = FastAPI(
 app.include_router(metricas_router)
 app.include_router(clientes_router)
 app.include_router(comentarios_router)
-
+app.include_router(categorias_router)
 
 @app.exception_handler(psycopg.Error)
 async def database_error(request: Request, exc: psycopg.Error):

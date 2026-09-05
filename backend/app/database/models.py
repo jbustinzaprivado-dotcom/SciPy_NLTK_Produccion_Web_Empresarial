@@ -28,3 +28,7 @@ class ComentarioNuevo(BaseModel):
         if self.cliente_id is None and self.cliente_nombre is None:
             raise ValueError("Indica cliente_id o cliente_nombre")
         return self
+class CategoriaNueva(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+    nombre: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=100)]
+    descripcion: str = Field(default="", max_length=500)

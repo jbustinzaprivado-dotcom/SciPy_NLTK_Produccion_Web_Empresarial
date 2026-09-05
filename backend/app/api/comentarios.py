@@ -2,6 +2,8 @@ from datetime import date
 from fastapi import APIRouter, Depends, HTTPException
 from app.database.connection import get_connection
 from app.database.models import ComentarioNuevo
+from app.services.nltk_service import clasificar_texto
+from app.services.auditoria_service import registrar
 
 router = APIRouter(prefix="/api/comentarios", tags=["Comentarios"])
 SELECT_COMENTARIOS = """
@@ -25,14 +27,18 @@ def crear_comentario(data: ComentarioNuevo, db=Depends(get_connection)):
         if not db.execute("SELECT id FROM clientes WHERE id = %s", (cliente_id,)).fetchone():
             raise HTTPException(404, "Cliente no encontrado")
     else:
-        # Serialize compatibility lookups by name; never merge ambiguous identities.
         db.execute("SELECT pg_advisory_xact_lock(hashtextextended(lower(%s), 0))", (data.cliente_nombre,))
         matches = db.execute("SELECT id FROM clientes WHERE lower(nombre) = lower(%s)", (data.cliente_nombre,)).fetchall()
         if len(matches) > 1:
             raise HTTPException(409, "Hay clientes con el mismo nombre; indica cliente_id")
         cliente_id = matches[0]["id"] if matches else db.execute("INSERT INTO clientes(nombre) VALUES (%s) RETURNING id", (data.cliente_nombre,)).fetchone()["id"]
-    comment_id = db.execute("INSERT INTO comentarios(cliente_id, contenido, fecha) VALUES (%s, %s, %s) RETURNING id", (cliente_id, data.comentario, data.fecha)).fetchone()["id"]
+    categoria, confianza = clasificar_texto(data.comentario)
+    comment_id = db.execute(
+        "INSERT INTO comentarios(cliente_id, contenido, fecha, categoria, procesado) VALUES (%s, %s, %s, %s, TRUE) RETURNING id",
+        (cliente_id, data.comentario, data.fecha, categoria),
+    ).fetchone()["id"]
     db.execute("INSERT INTO tiempos_atencion(cliente_id, comentario_id, tiempo_minutos, fecha) VALUES (%s, %s, %s, %s)", (cliente_id, comment_id, data.tiempo_atencion_minutos, data.fecha))
+    registrar(db, "crear_comentario", "comentarios", comment_id, {"categoria": categoria})
     result = db.execute(SELECT_COMENTARIOS + " WHERE c.id = %s", (comment_id,)).fetchone()
     db.commit()
     return result
