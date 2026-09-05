@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { requestJson } from '../services/http';
 
 const CRITERIOS = [
   { criterio: 'Conceptos de SciPy',  peso: '15%', evidencia: 'Explicacion y seleccion correcta de modulos.' },
@@ -26,7 +27,40 @@ const PRACTICAS = [
   'Para funciones criticas, agregar pruebas unitarias con datos reales anonimizados.',
 ];
 
+// Forma de la respuesta de GET /api/reportes
+interface ReporteData {
+  atencion: {
+    total_clientes: number;
+    total_comentarios: number;
+    total_atenciones_registradas: number;
+    comentarios_por_estado: { estado: string; total: number }[];
+  };
+  nlp: {
+    comentarios_por_categoria: { categoria: string; total: number }[];
+    total_procesados: number;
+    total_sin_procesar: number;
+  };
+  estadisticas: {
+    media: number | null;
+    mediana: number | null;
+    desviacion_estandar: number | null;
+    minimo: number | null;
+    maximo: number | null;
+    total_registros: number;
+    interpretacion: string;
+  };
+}
+
 export default function Reportes() {
+  const [reporte, setReporte] = useState<ReporteData | null>(null);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    requestJson<ReporteData>('/api/reportes')
+      .then(setReporte)
+      .catch(() => setError('No se pudo cargar el reporte. Revisa tu conexión.'));
+  }, []);
+
   return (
     <div className="page-shell" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       <header className="page-header" style={pageHeader}>
@@ -35,6 +69,67 @@ export default function Reportes() {
           <p style={sub}>Proyecto integrador — Portal web empresarial inteligente (SENATI)</p>
         </div>
       </header>
+
+      {error && <p role="alert">{error}</p>}
+
+      {/* Datos reales: Atencion / NLP / Estadisticas */}
+      <section>
+        <h3 style={sH3}>Resumen en Tiempo Real</h3>
+        {!reporte && !error ? (
+          <p style={{ fontSize: '0.85rem', color: '#64748b' }}>Cargando datos...</p>
+        ) : reporte && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
+            {/* Atencion */}
+            <div style={card}>
+              <h4 style={h4}>Atención</h4>
+              <KpiRow label="Clientes registrados"        value={reporte.atencion.total_clientes} />
+              <KpiRow label="Comentarios recibidos"       value={reporte.atencion.total_comentarios} />
+              <KpiRow label="Atenciones registradas"      value={reporte.atencion.total_atenciones_registradas} />
+              {reporte.atencion.comentarios_por_estado.length > 0 && (
+                <div style={{ marginTop: '0.6rem' }}>
+                  <span style={miniLabel}>Por estado</span>
+                  {reporte.atencion.comentarios_por_estado.map((e) => (
+                    <KpiRow key={e.estado} label={e.estado} value={e.total} />
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* NLP */}
+            <div style={card}>
+              <h4 style={h4}>Inteligencia NLP</h4>
+              <KpiRow label="Procesados por NLTK"  value={reporte.nlp.total_procesados} />
+              <KpiRow label="Sin procesar"          value={reporte.nlp.total_sin_procesar} />
+              {reporte.nlp.comentarios_por_categoria.length > 0 && (
+                <div style={{ marginTop: '0.6rem' }}>
+                  <span style={miniLabel}>Por categoría</span>
+                  {reporte.nlp.comentarios_por_categoria.map((c) => (
+                    <KpiRow key={c.categoria} label={c.categoria} value={c.total} />
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Estadisticas */}
+            <div style={card}>
+              <h4 style={h4}>Estadísticas (SciPy)</h4>
+              <KpiRow label="Atenciones analizadas" value={reporte.estadisticas.total_registros} />
+              {reporte.estadisticas.media !== null ? (
+                <>
+                  <KpiRow label="Media (min)"      value={reporte.estadisticas.media} />
+                  <KpiRow label="Mediana (min)"     value={reporte.estadisticas.mediana} />
+                  <KpiRow label="Desv. estándar"    value={reporte.estadisticas.desviacion_estandar} />
+                  <KpiRow label="Mínimo / Máximo"   value={`${reporte.estadisticas.minimo} / ${reporte.estadisticas.maximo}`} />
+                </>
+              ) : (
+                <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '0.5rem 0 0' }}>
+                  {reporte.estadisticas.interpretacion}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+      </section>
 
       {/* Arquitectura */}
       <section>
@@ -99,10 +194,21 @@ export default function Reportes() {
   );
 }
 
+function KpiRow({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.35rem 0', borderBottom: '1px solid #f1f5f9' }}>
+      <span style={{ fontSize: '0.82rem', color: '#475569', textTransform: 'capitalize' }}>{label}</span>
+      <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#0f172a' }}>{value}</span>
+    </div>
+  );
+}
+
 const card: React.CSSProperties       = { backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '1rem 1.25rem', boxSizing: 'border-box' };
 const pageHeader: React.CSSProperties  = { borderBottom: '1px solid #e2e8f0', paddingBottom: '1rem' };
 const h2: React.CSSProperties         = { margin: 0, fontSize: '1.5rem', fontWeight: 700, color: '#0f172a' };
+const h4: React.CSSProperties         = { margin: '0 0 0.5rem', fontSize: '0.95rem', fontWeight: 700, color: '#0f172a' };
 const sub: React.CSSProperties        = { margin: '0.2rem 0 0', fontSize: '0.85rem', color: '#64748b' };
 const sH3: React.CSSProperties        = { fontSize: '1rem', fontWeight: 600, color: '#1e293b', margin: '0 0 0.5rem' };
 const th: React.CSSProperties         = { padding: '0.5rem 0.6rem', fontWeight: 600 };
 const td: React.CSSProperties         = { padding: '0.5rem 0.6rem' };
+const miniLabel: React.CSSProperties  = { display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.3rem' };
