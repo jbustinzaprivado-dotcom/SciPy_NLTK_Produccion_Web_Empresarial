@@ -13,3 +13,8 @@ def requerir_usuario(authorization: str = Header(default="")):
         raise HTTPException(401, "Token inválido o vencido")
 
     return payload
+def requerir_admin(usuario: dict = Depends(requerir_usuario)):
+    # Reutiliza requerir_usuario (valida el token) y además exige rol admin
+    if usuario.get("rol") != "admin":
+        raise HTTPException(403, "Requiere rol de administrador")
+    return usuario

@@ -16,6 +16,7 @@ from scipy.interpolate import interp1d
 from app.api.categorias import router as categorias_router
 from app.api.auth import router as auth_router
 from app.api.auditoria import router as auditoria_router
+from app.api.usuarios import router as usuarios_router
 from app.api.reportes import router as reportes_router
 from psycopg.types.json import Jsonb
 
@@ -31,6 +32,7 @@ app.include_router(comentarios_router)
 app.include_router(categorias_router)
 app.include_router(auth_router)
 app.include_router(auditoria_router)
+app.include_router(usuarios_router)
 app.include_router(reportes_router)
 
 @app.exception_handler(psycopg.Error)

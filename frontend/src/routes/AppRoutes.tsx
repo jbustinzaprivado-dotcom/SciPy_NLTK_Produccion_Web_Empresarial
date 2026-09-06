@@ -12,6 +12,7 @@ import Login        from '../pages/Login';
 import { getToken }  from '../services/http';
 import Categorias   from '../pages/Categorias';
 import Auditoria    from '../pages/Auditoria';
+import Usuarios     from '../pages/Usuarios';
 
 function RutaProtegida({ children }: { children: React.ReactElement }) {
   if (!getToken()) return <Navigate to="/login" replace />;
@@ -33,6 +34,7 @@ export default function AppRoutes() {
         <Route path="/categorias"   element={<Categorias />} />
         <Route path="/reportes"     element={<Reportes />}     />
         <Route path="/auditoria"    element={<Auditoria />} />
+        <Route path="/usuarios"     element={<Usuarios />} />
         <Route path="*"             element={<Navigate to="/dashboard" replace />} />
       </Route>
     </Routes>

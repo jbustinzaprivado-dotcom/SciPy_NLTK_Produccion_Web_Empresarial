@@ -1,16 +1,36 @@
 import React, { useState } from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
 
-const nav = [
-  { to: '/dashboard',    label: 'Dashboard'     },
-  { to: '/metricas',     label: 'Metricas'      },
-  { to: '/optimizacion', label: 'Optimizacion'  },
-  { to: '/comentarios',  label: 'Comentarios'   },
-  { to: '/analisis-nlp', label: 'Analisis NLP'  },
-  { to: '/clientes',     label: 'Clientes'      },
-  { to: '/reportes',     label: 'Reportes'      },
-  { to: '/categorias',   label: 'Categorias'    },
-  { to: '/auditoria',    label: 'Auditoria'    },
+// Cada item de navegacion apunta a una ruta real de la app
+type NavItem = { to: string; label: string; icon: string };
+type NavGroup = { titulo: string; items: NavItem[] };
+
+// Item suelto, fuera de cualquier grupo (como "Inicio" en el dashboard de referencia)
+const inicio: NavItem = { to: '/dashboard', label: 'Dashboard', icon: '⌂' };
+
+// Agrupacion por area funcional, siguiendo la estructura del documento de arquitectura
+const grupos: NavGroup[] = [
+  { titulo: 'Clientes', items: [
+    { to: '/clientes', label: 'Clientes', icon: '♙' },
+  ]},
+  { titulo: 'Atención', items: [
+    { to: '/comentarios', label: 'Comentarios', icon: '✦' },
+  ]},
+  { titulo: 'Inteligencia NLP', items: [
+    { to: '/analisis-nlp', label: 'Análisis NLP', icon: '◌' },
+  ]},
+  { titulo: 'Scientific Data', items: [
+    { to: '/metricas', label: 'Métricas', icon: '◈' },
+    { to: '/optimizacion', label: 'Optimización', icon: '↗' },
+  ]},
+  { titulo: 'Reportes', items: [
+    { to: '/reportes', label: 'Reportes', icon: '▤' },
+  ]},
+  { titulo: 'Configuración', items: [
+    { to: '/categorias', label: 'Categorías', icon: '☰' },
+    { to: '/auditoria', label: 'Auditoría', icon: '⏱' },
+    { to: '/usuarios', label: 'Usuarios', icon: '⚙' },
+  ]},
 ];
 
 const themes = [
@@ -20,6 +40,16 @@ const themes = [
 ] as const;
 
 export default function MainLayout() {
+  const location = useLocation();
+
+  // El grupo que contiene la ruta activa arranca expandido; los demas, cerrados
+  const grupoActivo = grupos.find((g) => g.items.some((item) => location.pathname.startsWith(item.to)))?.titulo;
+  const [abiertos, setAbiertos] = useState<Record<string, boolean>>(() => (
+    grupoActivo ? { [grupoActivo]: true } : {}
+  ));
+
+  const alternar = (titulo: string) => setAbiertos((prev) => ({ ...prev, [titulo]: !prev[titulo] }));
+
   const [theme, setTheme] = useState<(typeof themes)[number]['id']>('eucalyptus');
   const themeIndex = themes.findIndex((item) => item.id === theme);
   const nextTheme = themes[(themeIndex + 1) % themes.length];
@@ -29,17 +59,41 @@ export default function MainLayout() {
       <aside className="sidebar">
         <div className="brand"><div className="brand-mark">CI</div><div className="brand-copy"><div className="brand-name">Centro IA</div><div className="brand-sub">Atención empresarial</div></div></div>
         <div className="profile"><div className="profile-avatar">◉</div><strong>Panel ejecutivo</strong><span>operaciones@empresa.com</span></div>
-          <nav className="nav" aria-label="Navegación principal">
-            {nav.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
-              >
-                <span className="nav-icon">{['⌂','◈','↗','✦','◌','♙','▤','☰','⏱'][nav.indexOf(item)]}</span><span className="nav-label">{item.label}</span>
-              </NavLink>
-            ))}
-          </nav>
+        <nav className="nav" aria-label="Navegación principal">
+          <NavLink to={inicio.to} className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
+            <span className="nav-icon">{inicio.icon}</span><span className="nav-label">{inicio.label}</span>
+          </NavLink>
+
+          {grupos.map((grupo) => {
+            const abierto = !!abiertos[grupo.titulo];
+            return (
+              <div key={grupo.titulo} className="nav-group">
+                <button
+                  type="button"
+                  className="nav-group-header"
+                  onClick={() => alternar(grupo.titulo)}
+                  aria-expanded={abierto}
+                >
+                  <span>{grupo.titulo.toUpperCase()}</span>
+                  <span className="nav-group-caret">{abierto ? '▾' : '▸'}</span>
+                </button>
+                {abierto && (
+                  <div className="nav-group-items">
+                    {grupo.items.map((item) => (
+                      <NavLink
+                        key={item.to}
+                        to={item.to}
+                        className={({ isActive }) => `nav-link nav-sublink${isActive ? ' active' : ''}`}
+                      >
+                        <span className="nav-icon">{item.icon}</span><span className="nav-label">{item.label}</span>
+                      </NavLink>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </nav>
       </aside>
       <main className="main-area">
         <div className="theme-switcher" role="group" aria-label="Selector de tema de color">
