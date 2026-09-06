@@ -206,7 +206,7 @@ def get_keywords(db=Depends(get_connection)):
     return {"keywords": keywords, "total_palabras_clave": len(keywords)}
 
 # Ejercicio 5: Clasificador de Mensajes
-@app.post("/api/nltk/clasificar")
+@app.post("/api/nltk/clasificar", dependencies=[Depends(requerir_usuario)])
 def clasificar_ticket(data: MensajeInput):
     msg = data.mensaje.lower()
     palabras_reclamo = ["demora", "retraso", "queja", "reclamo", "mal", "pésimo", "lento", "error", "falla"]
@@ -234,7 +234,7 @@ def clasificar_ticket(data: MensajeInput):
     }
 
 # Ejercicio 6: Buscador inteligente de servicios
-@app.get("/api/nltk/buscar")
+@app.get("/api/nltk/buscar", dependencies=[Depends(requerir_usuario)])
 def buscar_servicios(q: str = Query("")):
     servicios = [
         {
