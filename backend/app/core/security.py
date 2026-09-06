@@ -27,3 +27,6 @@ def decodificar_token(token: str) -> dict | None:
         return jwt.decode(token, secret_key(), algorithms=[ALGORITHM])
     except jwt.PyJWTError:
         return None
+def encriptar_password(password: str) -> str:
+    # Alias usado por el registro con reconocimiento facial
+    return hash_password(password)

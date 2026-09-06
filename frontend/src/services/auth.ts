@@ -1,4 +1,4 @@
-import { requestJson, setToken } from './http';
+import { requestPublicJson, setToken } from './http';
 
 interface LoginResponse {
   access_token: string;
@@ -8,7 +8,7 @@ interface LoginResponse {
 }
 
 export async function login(email: string, password: string): Promise<LoginResponse> {
-  const data = await requestJson<LoginResponse>('/api/auth/login', {
+  const data = await requestPublicJson<LoginResponse>('/api/auth/login', {
     method: 'POST',
     body: JSON.stringify({ email, password }),
   });

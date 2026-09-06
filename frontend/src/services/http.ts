@@ -31,3 +31,16 @@ export async function requestJson<T>(url: string, options: RequestInit = {}): Pr
   if (!response.ok) throw new Error(`La solicitud fue rechazada (HTTP ${response.status}).`);
   return response.json();
 }
+// Para endpoints de login/registro: a diferencia de requestJson, un 401 acá
+// significa "credenciales invalidas", no "sesion expirada" — no debe redirigir.
+export async function requestPublicJson<T>(url: string, options: RequestInit = {}): Promise<T> {
+  const fullUrl = url.startsWith('/api') ? `${API_BASE}${url}` : url;
+  const headers = new Headers(options.headers);
+  if (options.body && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
+  const response = await fetch(fullUrl, { ...options, headers });
+  if (!response.ok) {
+    const data = await response.json().catch(() => null);
+    throw new Error(data?.detail || `La solicitud fue rechazada (HTTP ${response.status}).`);
+  }
+  return response.json();
+}

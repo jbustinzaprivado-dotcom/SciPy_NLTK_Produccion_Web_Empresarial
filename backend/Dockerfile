@@ -1,5 +1,7 @@
 FROM python:3.12-slim
 WORKDIR /workspace/backend
+# opencv-python-headless necesita esta libreria del sistema para poder importarse
+RUN apt-get update && apt-get install -y --no-install-recommends libglib2.0-0 && rm -rf /var/lib/apt/lists/*
 COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 # Descarga los datos de NLTK (stopwords, tokenizador) durante el build,

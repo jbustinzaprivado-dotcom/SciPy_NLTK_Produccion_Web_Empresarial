@@ -1,5 +1,9 @@
 import os
+from dotenv import load_dotenv
 
+# Esto lee el archivo .env y carga las variables en os.environ (si existe;
+# si no, no hace nada y sigue usando las variables de entorno del sistema)
+load_dotenv()
 
 def database_url():
     value = os.environ.get("DATABASE_URL")
@@ -8,5 +12,6 @@ def database_url():
     if not value:
         raise RuntimeError("Configura DATABASE_URL antes de iniciar el backend.")
     return value
+
 def secret_key() -> str:
     return os.environ.get("SECRET_KEY", "clave-de-desarrollo-cambiar-en-produccion")
