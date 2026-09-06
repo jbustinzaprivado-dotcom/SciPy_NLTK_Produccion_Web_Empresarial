@@ -18,6 +18,7 @@ from app.api.auth import router as auth_router
 from app.api.auditoria import router as auditoria_router
 from app.api.usuarios import router as usuarios_router
 from app.api.reportes import router as reportes_router
+from app.api.tiempos_atencion import router as tiempos_atencion_router
 from psycopg.types.json import Jsonb
 
 app = FastAPI(
@@ -34,6 +35,7 @@ app.include_router(auth_router)
 app.include_router(auditoria_router)
 app.include_router(usuarios_router)
 app.include_router(reportes_router)
+app.include_router(tiempos_atencion_router)
 
 @app.exception_handler(psycopg.Error)
 async def database_error(request: Request, exc: psycopg.Error):

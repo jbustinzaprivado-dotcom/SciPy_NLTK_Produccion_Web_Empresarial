@@ -16,7 +16,9 @@ const grupos: NavGroup[] = [
     { to: '/clientes/historial', label: 'Historial', icon: '⏳' },
   ]},
   { titulo: 'Atención', items: [
+    { to: '/solicitudes', label: 'Solicitudes', icon: '◔' },
     { to: '/comentarios', label: 'Comentarios', icon: '✦' },
+    { to: '/tiempos-atencion', label: 'Tiempos de atención', icon: '⏲' },
   ]},
   { titulo: 'Inteligencia NLP', items: [
     { to: '/analisis-nlp', label: 'Análisis NLP', icon: '◌' },

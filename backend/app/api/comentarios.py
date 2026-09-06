@@ -17,9 +17,12 @@ JOIN tiempos_atencion t ON t.comentario_id = c.id
 
 
 @router.get("")
-def listar_comentarios(fecha: date | None = None, cliente_id: int | None = None, db=Depends(get_connection)):
-    return db.execute(SELECT_COMENTARIOS + " WHERE (%s::date IS NULL OR c.fecha = %s) AND (%s::bigint IS NULL OR c.cliente_id = %s) ORDER BY c.fecha DESC, c.id DESC", (fecha, fecha, cliente_id, cliente_id)).fetchall()
-
+def listar_comentarios(fecha: date | None = None, cliente_id: int | None = None, estado: str | None = None, db=Depends(get_connection)):
+    return db.execute(
+        SELECT_COMENTARIOS + " WHERE (%s::date IS NULL OR c.fecha = %s) AND (%s::bigint IS NULL OR c.cliente_id = %s) "
+        "AND (%s::text IS NULL OR c.estado = %s) ORDER BY c.fecha DESC, c.id DESC",
+        (fecha, fecha, cliente_id, cliente_id, estado, estado),
+    ).fetchall()
 
 @router.post("", status_code=201)
 def crear_comentario(data: ComentarioNuevo, db=Depends(get_connection)):
@@ -41,5 +44,17 @@ def crear_comentario(data: ComentarioNuevo, db=Depends(get_connection)):
     db.execute("INSERT INTO tiempos_atencion(cliente_id, comentario_id, tiempo_minutos, fecha) VALUES (%s, %s, %s, %s)", (cliente_id, comment_id, data.tiempo_atencion_minutos, data.fecha))
     registrar(db, "crear_comentario", "comentarios", comment_id, {"categoria": categoria})
     result = db.execute(SELECT_COMENTARIOS + " WHERE c.id = %s", (comment_id,)).fetchone()
+    db.commit()
+    return result
+@router.patch("/{comentario_id}/estado")
+def cambiar_estado_comentario(comentario_id: int, nuevo_estado: str, db=Depends(get_connection)):
+    # Usada por el modulo de Solicitudes para marcar una solicitud como resuelta
+    result = db.execute(
+        "UPDATE comentarios SET estado = %s WHERE id = %s RETURNING id::text, estado",
+        (nuevo_estado, comentario_id),
+    ).fetchone()
+    if not result:
+        raise HTTPException(404, "Comentario no encontrado")
+    registrar(db, "cambiar_estado_comentario", "comentarios", comentario_id, {"estado": nuevo_estado})
     db.commit()
     return result

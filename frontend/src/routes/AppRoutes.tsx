@@ -5,6 +5,8 @@ import Dashboard    from '../pages/Dashboard';
 import Metricas     from '../pages/Metricas';
 import Optimizacion from '../pages/Optimizacion';
 import Comentarios  from '../pages/Comentarios';
+import Solicitudes      from '../pages/Solicitudes';
+import TiemposAtencion  from '../pages/TiemposAtencion';
 import AnalisisNLP  from '../pages/AnalisisNLP';
 import Clientes     from '../pages/Clientes';
 import NuevoCliente     from '../pages/NuevoCliente';
@@ -31,6 +33,8 @@ export default function AppRoutes() {
         <Route path="/metricas"     element={<Metricas />}     />
         <Route path="/optimizacion" element={<Optimizacion />} />
         <Route path="/comentarios"  element={<Comentarios />}  />
+        <Route path="/solicitudes"       element={<Solicitudes />}      />
+        <Route path="/tiempos-atencion"  element={<TiemposAtencion />}  />
         <Route path="/analisis-nlp" element={<AnalisisNLP />}  />
         <Route path="/clientes"     element={<Clientes />}     />
         <Route path="/clientes/nuevo"     element={<NuevoCliente />}     />
