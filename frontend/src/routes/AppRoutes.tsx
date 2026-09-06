@@ -8,6 +8,8 @@ import Comentarios  from '../pages/Comentarios';
 import Solicitudes      from '../pages/Solicitudes';
 import TiemposAtencion  from '../pages/TiemposAtencion';
 import AnalisisNLP  from '../pages/AnalisisNLP';
+import AnalizarComentario  from '../pages/AnalizarComentario';
+import PalabrasFrecuentes  from '../pages/PalabrasFrecuentes';
 import Clientes     from '../pages/Clientes';
 import NuevoCliente     from '../pages/NuevoCliente';
 import HistorialCliente  from '../pages/HistorialCliente';
@@ -36,6 +38,8 @@ export default function AppRoutes() {
         <Route path="/solicitudes"       element={<Solicitudes />}      />
         <Route path="/tiempos-atencion"  element={<TiemposAtencion />}  />
         <Route path="/analisis-nlp" element={<AnalisisNLP />}  />
+        <Route path="/analizar-comentario"  element={<AnalizarComentario />}  />
+        <Route path="/palabras-frecuentes"  element={<PalabrasFrecuentes />}  />
         <Route path="/clientes"     element={<Clientes />}     />
         <Route path="/clientes/nuevo"     element={<NuevoCliente />}     />
         <Route path="/clientes/historial" element={<HistorialCliente />} />

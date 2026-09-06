@@ -21,7 +21,10 @@ const grupos: NavGroup[] = [
     { to: '/tiempos-atencion', label: 'Tiempos de atención', icon: '⏲' },
   ]},
   { titulo: 'Inteligencia NLP', items: [
-    { to: '/analisis-nlp', label: 'Análisis NLP', icon: '◌' },
+    { to: '/analizar-comentario', label: 'Analizar comentario', icon: '◍' },
+    { to: '/palabras-frecuentes', label: 'Palabras frecuentes', icon: '❋' },
+    { to: '/analisis-nlp', label: 'Clasificación', icon: '◌' },
+    { to: '/categorias', label: 'Categorías', icon: '☰' },
   ]},
   { titulo: 'Scientific Data', items: [
     { to: '/metricas', label: 'Métricas', icon: '◈' },

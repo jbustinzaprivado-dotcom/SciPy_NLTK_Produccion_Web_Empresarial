@@ -58,3 +58,22 @@ def cambiar_estado_comentario(comentario_id: int, nuevo_estado: str, db=Depends(
     registrar(db, "cambiar_estado_comentario", "comentarios", comentario_id, {"estado": nuevo_estado})
     db.commit()
     return result
+@router.get("/{comentario_id}/analisis")
+def analizar_comentario(comentario_id: int, db=Depends(get_connection)):
+    # Muestra el desglose NLTK (tokens y palabras clave) de UN comentario real puntual
+    from nltk.tokenize import word_tokenize
+    from nltk.corpus import stopwords
+
+    fila = db.execute(
+        "SELECT c.id::text, c.contenido, c.categoria, cl.nombre AS cliente_nombre "
+        "FROM comentarios c JOIN clientes cl ON cl.id = c.cliente_id WHERE c.id = %s",
+        (comentario_id,),
+    ).fetchone()
+    if not fila:
+        raise HTTPException(404, "Comentario no encontrado")
+
+    tokens = word_tokenize(fila["contenido"].lower(), language="spanish")
+    stop = set(stopwords.words("spanish"))
+    palabras_clave = sorted({t for t in tokens if t.isalpha() and t not in stop})
+
+    return {**fila, "total_tokens": len(tokens), "palabras_clave": palabras_clave}
