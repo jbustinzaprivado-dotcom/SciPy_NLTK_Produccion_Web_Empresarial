@@ -32,7 +32,9 @@ const grupos: NavGroup[] = [
     { to: '/optimizacion', label: 'Optimización', icon: '↗' },
   ]},
   { titulo: 'Reportes', items: [
-    { to: '/reportes', label: 'Reportes', icon: '▤' },
+    { to: '/reportes/atencion', label: 'Atención', icon: '◔' },
+    { to: '/reportes/nlp', label: 'NLP', icon: '❋' },
+    { to: '/reportes/estadisticas', label: 'Estadísticas', icon: '▤' },
   ]},
   { titulo: 'Configuración', items: [
     { to: '/categorias', label: 'Categorías', icon: '☰' },

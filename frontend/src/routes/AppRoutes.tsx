@@ -14,7 +14,9 @@ import PalabrasFrecuentes  from '../pages/PalabrasFrecuentes';
 import Clientes     from '../pages/Clientes';
 import NuevoCliente     from '../pages/NuevoCliente';
 import HistorialCliente  from '../pages/HistorialCliente';
-import Reportes     from '../pages/Reportes';
+import ReporteAtencion     from '../pages/ReporteAtencion';
+import ReporteNLP          from '../pages/ReporteNLP';
+import ReporteEstadisticas from '../pages/ReporteEstadisticas';
 import Login        from '../pages/Login';
 import { getToken }  from '../services/http';
 import Categorias   from '../pages/Categorias';
@@ -46,7 +48,9 @@ export default function AppRoutes() {
         <Route path="/clientes/nuevo"     element={<NuevoCliente />}     />
         <Route path="/clientes/historial" element={<HistorialCliente />} />
         <Route path="/categorias"   element={<Categorias />} />
-        <Route path="/reportes"     element={<Reportes />}     />
+        <Route path="/reportes/atencion"     element={<ReporteAtencion />}     />
+        <Route path="/reportes/nlp"          element={<ReporteNLP />}          />
+        <Route path="/reportes/estadisticas" element={<ReporteEstadisticas />} />
         <Route path="/auditoria"    element={<Auditoria />} />
         <Route path="/usuarios"     element={<Usuarios />} />
         <Route path="*"             element={<Navigate to="/dashboard" replace />} />
