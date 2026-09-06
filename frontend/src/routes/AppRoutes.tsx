@@ -7,6 +7,8 @@ import Optimizacion from '../pages/Optimizacion';
 import Comentarios  from '../pages/Comentarios';
 import AnalisisNLP  from '../pages/AnalisisNLP';
 import Clientes     from '../pages/Clientes';
+import NuevoCliente     from '../pages/NuevoCliente';
+import HistorialCliente  from '../pages/HistorialCliente';
 import Reportes     from '../pages/Reportes';
 import Login        from '../pages/Login';
 import { getToken }  from '../services/http';
@@ -31,6 +33,8 @@ export default function AppRoutes() {
         <Route path="/comentarios"  element={<Comentarios />}  />
         <Route path="/analisis-nlp" element={<AnalisisNLP />}  />
         <Route path="/clientes"     element={<Clientes />}     />
+        <Route path="/clientes/nuevo"     element={<NuevoCliente />}     />
+        <Route path="/clientes/historial" element={<HistorialCliente />} />
         <Route path="/categorias"   element={<Categorias />} />
         <Route path="/reportes"     element={<Reportes />}     />
         <Route path="/auditoria"    element={<Auditoria />} />

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 
 // Cada item de navegacion apunta a una ruta real de la app
-type NavItem = { to: string; label: string; icon: string };
+type NavItem = { to: string; label: string; icon: string; end?: boolean };
 type NavGroup = { titulo: string; items: NavItem[] };
 
 // Item suelto, fuera de cualquier grupo (como "Inicio" en el dashboard de referencia)
@@ -11,7 +11,9 @@ const inicio: NavItem = { to: '/dashboard', label: 'Dashboard', icon: '⌂' };
 // Agrupacion por area funcional, siguiendo la estructura del documento de arquitectura
 const grupos: NavGroup[] = [
   { titulo: 'Clientes', items: [
-    { to: '/clientes', label: 'Clientes', icon: '♙' },
+    { to: '/clientes', label: 'Lista de clientes', icon: '♙', end: true },
+    { to: '/clientes/nuevo', label: 'Nuevo cliente', icon: '✚' },
+    { to: '/clientes/historial', label: 'Historial', icon: '⏳' },
   ]},
   { titulo: 'Atención', items: [
     { to: '/comentarios', label: 'Comentarios', icon: '✦' },
@@ -83,6 +85,7 @@ export default function MainLayout() {
                       <NavLink
                         key={item.to}
                         to={item.to}
+                        end={item.end}
                         className={({ isActive }) => `nav-link nav-sublink${isActive ? ' active' : ''}`}
                       >
                         <span className="nav-icon">{item.icon}</span><span className="nav-label">{item.label}</span>
