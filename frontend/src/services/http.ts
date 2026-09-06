@@ -1,5 +1,9 @@
 const TOKEN_KEY = 'auth_token';
 
+// En local queda vacío (Vite usa su proxy /api -> localhost:8000).
+// En producción (Vercel), se configura VITE_API_URL con la URL del backend real.
+const API_BASE = import.meta.env.VITE_API_URL || '';
+
 export function getToken(): string | null {
   return localStorage.getItem(TOKEN_KEY);
 }
@@ -13,11 +17,12 @@ export function clearToken(): void {
 }
 
 export async function requestJson<T>(url: string, options: RequestInit = {}): Promise<T> {
+  const fullUrl = url.startsWith('/api') ? `${API_BASE}${url}` : url;
   const headers = new Headers(options.headers);
   if (options.body && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
   const token = getToken();
   if (token) headers.set('Authorization', `Bearer ${token}`);
-  const response = await fetch(url, { ...options, headers });
+  const response = await fetch(fullUrl, { ...options, headers });
   if (response.status === 401) {
     clearToken();
     window.location.href = '/login';
