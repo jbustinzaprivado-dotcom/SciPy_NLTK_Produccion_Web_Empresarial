@@ -27,7 +27,8 @@ const grupos: NavGroup[] = [
     { to: '/categorias', label: 'Categorías', icon: '☰' },
   ]},
   { titulo: 'Scientific Data', items: [
-    { to: '/metricas', label: 'Métricas', icon: '◈' },
+    { to: '/metricas', label: 'Estadísticas', icon: '◈' },
+    { to: '/interpolacion', label: 'Interpolación', icon: '∿' },
     { to: '/optimizacion', label: 'Optimización', icon: '↗' },
   ]},
   { titulo: 'Reportes', items: [

@@ -4,6 +4,7 @@ import MainLayout from '../layouts/MainLayout';
 import Dashboard    from '../pages/Dashboard';
 import Metricas     from '../pages/Metricas';
 import Optimizacion from '../pages/Optimizacion';
+import Interpolacion from '../pages/Interpolacion';
 import Comentarios  from '../pages/Comentarios';
 import Solicitudes      from '../pages/Solicitudes';
 import TiemposAtencion  from '../pages/TiemposAtencion';
@@ -34,6 +35,7 @@ export default function AppRoutes() {
         <Route path="/dashboard"    element={<Dashboard />}    />
         <Route path="/metricas"     element={<Metricas />}     />
         <Route path="/optimizacion" element={<Optimizacion />} />
+        <Route path="/interpolacion" element={<Interpolacion />} />
         <Route path="/comentarios"  element={<Comentarios />}  />
         <Route path="/solicitudes"       element={<Solicitudes />}      />
         <Route path="/tiempos-atencion"  element={<TiemposAtencion />}  />
