@@ -1,0 +1,164 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+
+export default function Register() {
+  const [nombre, setNombre] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [cargando, setCargando] = useState(false);
+  
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [cameraActive, setCameraActive] = useState(false);
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [streamObj, setStreamObj] = useState<MediaStream | null>(null);
+
+  const navigate = useNavigate();
+
+  // Efecto robusto para conectar el stream al elemento video de forma segura
+  useEffect(() => {
+    let currentStream = null;
+    async function setupCamera() {
+      if (cameraActive) {
+        try {
+          currentStream = await navigator.mediaDevices.getUserMedia({ video: true });
+          setStreamObj(currentStream);
+          if (videoRef.current) {
+            videoRef.current.srcObject = currentStream;
+          }
+        } catch (err) {
+          console.error(err);
+          setCameraActive(false);
+          setError('No se pudo acceder a la cámara. Verifica permisos o Iriun.');
+        }
+      }
+    }
+    setupCamera();
+
+    return () => {
+      if (currentStream) {
+        currentStream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, [cameraActive]);
+
+  const startCamera = () => {
+    setError(null);
+    setCapturedImage(null);
+    setCameraActive(true);
+  };
+
+  const stopCamera = () => {
+    if (streamObj) {
+      streamObj.getTracks().forEach(track => track.stop());
+      setStreamObj(null);
+    }
+    setCameraActive(false);
+  };
+
+  const capturePhoto = () => {
+    if (!videoRef.current) return;
+    const canvas = document.createElement('canvas');
+    canvas.width = videoRef.current.videoWidth || 320;
+    canvas.height = videoRef.current.videoHeight || 240;
+    const ctx = canvas.getContext('2d');
+    ctx?.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+    
+    const imageBase64 = canvas.toDataURL('image/jpeg');
+    setCapturedImage(imageBase64);
+    stopCamera(); // Apagamos la cámara al capturar para liberar recursos
+  };
+
+  async function handleRegister(e: React.FormEvent) {
+    e.preventDefault();
+    if (!capturedImage) {
+      setError('Debes capturar tu rostro para registrarte');
+      return;
+    }
+
+    setCargando(true);
+    setError(null);
+
+    try {
+      const response = await fetch('http://localhost:8000/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          nombre: nombre.trim(), 
+          email: email.trim(), 
+          password, 
+          face_image: capturedImage 
+        })
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.detail || 'Error al registrar el usuario');
+      }
+
+      alert('¡Registro exitoso! Ya puedes iniciar sesión.');
+      navigate('/login');
+    } catch (err: any) {
+      setError(err.message || 'Hubo un error en el servidor');
+    } finally {
+      setCargando(false);
+    }
+  }
+
+  return (
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#eef2f8' }}>
+      <div className="panel" style={{ padding: 32, width: 380 }}>
+        <h1 style={{ margin: '0 0 4px', font: '700 22px "Space Grotesk"', color: '#172033' }}>Registro Facial</h1>
+        <p style={{ margin: '0 0 20px', color: '#8390a3', fontSize: 13 }}>Crea tu cuenta vinculada a tu rostro</p>
+        
+        <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <input className="field" type="text" placeholder="Nombre completo" value={nombre} onChange={e => setNombre(e.target.value)} required />
+          <input className="field" type="email" placeholder="Correo electrónico" value={email} onChange={e => setEmail(e.target.value)} required />
+          <input className="field" type="password" placeholder="Contraseña" value={password} onChange={e => setPassword(e.target.value)} required />
+
+          {/* Sección de Cámara */}
+          <div style={{ background: '#000', borderRadius: 8, overflow: 'hidden', minHeight: 160, display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
+            <video 
+              ref={videoRef} 
+              autoPlay 
+              playsInline 
+              muted 
+              style={{ width: '100%', display: cameraActive && !capturedImage ? 'block' : 'none' }} 
+            />
+            {capturedImage && (
+              <img src={capturedImage} alt="Rostro capturado" style={{ width: '100%', height: 'auto', display: 'block' }} />
+            )}
+            {!cameraActive && !capturedImage && (
+              <button type="button" onClick={startCamera} style={{ background: '#2563eb', color: '#fff', border: 'none', padding: '8px 12px', borderRadius: 4, cursor: 'pointer', fontSize: 12 }}>
+                Encender Cámara para Foto
+              </button>
+            )}
+          </div>
+
+          {cameraActive && !capturedImage && (
+            <button type="button" onClick={capturePhoto} className="primary-btn" style={{ background: '#059669' }}>
+              Tomar Foto del Rostro
+            </button>
+          )}
+
+          {capturedImage && (
+            <button type="button" onClick={startCamera} style={{ background: 'transparent', border: 'none', color: '#2563eb', fontSize: 12, cursor: 'pointer' }}>
+              Volver a tomar foto
+            </button>
+          )}
+
+          {error && <p style={{ color: '#c0392b', fontSize: 12, margin: 0 }}>{error}</p>}
+
+          <button className="primary-btn" type="submit" disabled={cargando}>
+            {cargando ? 'Registrando...' : 'Completar Registro'}
+          </button>
+
+          <Link to="/login" style={{ textAlign: 'center', color: '#64748b', fontSize: 12, textDecoration: 'none', marginTop: 8 }}>
+            ¿Ya tienes cuenta? Inicia sesión
+          </Link>
+        </form>
+      </div>
+    </div>
+  );
+}

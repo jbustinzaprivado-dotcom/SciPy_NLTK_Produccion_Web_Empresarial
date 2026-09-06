@@ -6,7 +6,7 @@ import Metricas     from '../pages/Metricas';
 import Optimizacion from '../pages/Optimizacion';
 import Interpolacion from '../pages/Interpolacion';
 import Comentarios  from '../pages/Comentarios';
-import Solicitudes      from '../pages/Solicitudes';
+import Solicitudes       from '../pages/Solicitudes';
 import TiemposAtencion  from '../pages/TiemposAtencion';
 import AnalisisNLP  from '../pages/AnalisisNLP';
 import AnalizarComentario  from '../pages/AnalizarComentario';
@@ -18,6 +18,7 @@ import ReporteAtencion     from '../pages/ReporteAtencion';
 import ReporteNLP          from '../pages/ReporteNLP';
 import ReporteEstadisticas from '../pages/ReporteEstadisticas';
 import Login        from '../pages/Login';
+import Register     from '../pages/Register'; // <-- Importamos la vista de registro
 import { getToken }  from '../services/http';
 import Categorias   from '../pages/Categorias';
 import Auditoria    from '../pages/Auditoria';
@@ -31,7 +32,11 @@ function RutaProtegida({ children }: { children: React.ReactElement }) {
 export default function AppRoutes() {
   return (
     <Routes>
+      {/* Rutas públicas de autenticación */}
       <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} /> {/* <-- Ruta de registro habilitada */}
+
+      {/* Rutas protegidas dentro del layout principal */}
       <Route element={<RutaProtegida><MainLayout /></RutaProtegida>}>
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard"    element={<Dashboard />}    />
@@ -39,7 +44,7 @@ export default function AppRoutes() {
         <Route path="/optimizacion" element={<Optimizacion />} />
         <Route path="/interpolacion" element={<Interpolacion />} />
         <Route path="/comentarios"  element={<Comentarios />}  />
-        <Route path="/solicitudes"       element={<Solicitudes />}      />
+        <Route path="/solicitudes"       element={<Solicitudes />}       />
         <Route path="/tiempos-atencion"  element={<TiemposAtencion />}  />
         <Route path="/analisis-nlp" element={<AnalisisNLP />}  />
         <Route path="/analizar-comentario"  element={<AnalizarComentario />}  />
