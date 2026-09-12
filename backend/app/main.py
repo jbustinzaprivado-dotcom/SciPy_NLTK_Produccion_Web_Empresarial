@@ -19,7 +19,9 @@ from app.api.auditoria import router as auditoria_router
 from app.api.usuarios import router as usuarios_router
 from app.api.reportes import router as reportes_router
 from app.api.tiempos_atencion import router as tiempos_atencion_router
+from app.api.landing import router as landing_router
 from psycopg.types.json import Jsonb
+from app.services.nltk_service import palabras_frecuentes, clasificar_texto
 
 app = FastAPI(
     title="Empresa Inteligente - API",
@@ -36,6 +38,7 @@ app.include_router(auditoria_router)
 app.include_router(usuarios_router)
 app.include_router(reportes_router)
 app.include_router(tiempos_atencion_router)
+app.include_router(landing_router)
 
 @app.exception_handler(psycopg.Error)
 async def database_error(request: Request, exc: psycopg.Error):
@@ -187,52 +190,34 @@ def get_interpolacion(dias: int = Query(14, ge=2, le=90), db=Depends(get_connect
 # Ejercicio 4: Análisis de palabras clave
 @app.get("/api/comentarios/keywords", dependencies=[Depends(requerir_usuario)])
 def get_keywords(db=Depends(get_connection)):
-    from nltk.tokenize import word_tokenize
-    from nltk.corpus import stopwords
-    from collections import Counter
-
     filas = db.execute("SELECT contenido FROM comentarios ORDER BY id DESC LIMIT 200").fetchall()
-    texto = " ".join(fila["contenido"] for fila in filas)
+    textos = [fila["contenido"] for fila in filas]
 
-    if not texto.strip():
-        return {"keywords": [], "total_palabras_clave": 0}
-
-    tokens = word_tokenize(texto.lower(), language="spanish")
-    stop = set(stopwords.words("spanish"))
-    limpios = [t for t in tokens if t.isalpha() and t not in stop]
-    frecuentes = Counter(limpios).most_common(7)
-    keywords = [{"palabra": pal, "frecuencia": frec} for pal, frec in frecuentes]
+    keywords = palabras_frecuentes(textos, top=7)
 
     return {"keywords": keywords, "total_palabras_clave": len(keywords)}
 
 # Ejercicio 5: Clasificador de Mensajes
 @app.post("/api/nltk/clasificar", dependencies=[Depends(requerir_usuario)])
 def clasificar_ticket(data: MensajeInput):
-    msg = data.mensaje.lower()
-    palabras_reclamo = ["demora", "retraso", "queja", "reclamo", "mal", "pésimo", "lento", "error", "falla"]
-    palabras_ventas = ["precio", "costo", "cotizar", "comprar", "planes", "licencias", "venta", "adquirir"]
-    palabras_soporte = ["ayuda", "problema", "computadora", "servidor", "acceso", "configurar", "soporte", "sistema"]
+    from app.services.nltk_service import PALABRAS_RECLAMO, PALABRAS_VENTAS, PALABRAS_SOPORTE
 
-    if any(p in msg for p in palabras_reclamo):
-        cat = "reclamo"
-        conf = 0.94
-        encontradas = [p for p in palabras_reclamo if p in msg]
-    elif any(p in msg for p in palabras_ventas):
-        cat = "ventas"
-        conf = 0.91
-        encontradas = [p for p in palabras_ventas if p in msg]
+    msg = data.mensaje.lower()
+    categoria, confianza = clasificar_texto(data.mensaje)
+
+    if categoria == "reclamo":
+        encontradas = [p for p in PALABRAS_RECLAMO if p in msg]
+    elif categoria == "ventas":
+        encontradas = [p for p in PALABRAS_VENTAS if p in msg]
     else:
-        cat = "soporte"
-        conf = 0.86
-        encontradas = [p for p in palabras_soporte if p in msg] or ["general"]
+        encontradas = [p for p in PALABRAS_SOPORTE if p in msg] or ["general"]
 
     return {
         "mensaje": data.mensaje,
-        "categoria": cat,
-        "confianza": conf,
+        "categoria": categoria,
+        "confianza": confianza,
         "palabras_clave_detectadas": encontradas
     }
-
 # Ejercicio 6: Buscador inteligente de servicios
 @app.get("/api/nltk/buscar", dependencies=[Depends(requerir_usuario)])
 def buscar_servicios(q: str = Query("")):

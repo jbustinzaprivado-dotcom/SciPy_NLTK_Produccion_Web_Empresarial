@@ -12,7 +12,7 @@ SELECT c.id::text, c.cliente_id, cl.nombre AS cliente_nombre, c.fecha,
        c.contenido AS comentario, c.estado, c.categoria, c.procesado,
        t.tiempo_minutos::float8 AS tiempo_atencion_minutos
 FROM comentarios c JOIN clientes cl ON cl.id = c.cliente_id
-JOIN tiempos_atencion t ON t.comentario_id = c.id
+LEFT JOIN tiempos_atencion t ON t.comentario_id = c.id
 """
 
 
