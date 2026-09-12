@@ -5,6 +5,7 @@ import psycopg
 from app.api.metricas import router as metricas_router
 from app.api.clientes import router as clientes_router
 from app.api.comentarios import router as comentarios_router
+from app.api.contacto import router as contacto_router
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import numpy as np
@@ -20,6 +21,7 @@ app = FastAPI(
 app.include_router(metricas_router)
 app.include_router(clientes_router)
 app.include_router(comentarios_router)
+app.include_router(contacto_router)
 
 
 @app.exception_handler(psycopg.Error)

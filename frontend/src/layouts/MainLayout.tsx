@@ -9,6 +9,8 @@ const nav = [
   { to: '/analisis-nlp', label: 'Analisis NLP'  },
   { to: '/clientes',     label: 'Clientes'      },
   { to: '/reportes',     label: 'Reportes'      },
+  { to: '/landing#contacto', label: 'Contáctenos' },
+  { to: '/consultas', label: 'Consultas web' },
 ];
 
 const themes = [
@@ -32,9 +34,10 @@ export default function MainLayout() {
               <NavLink
                 key={item.to}
                 to={item.to}
+                aria-label={item.label}
                 className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
               >
-                <span className="nav-icon">{['⌂','◈','↗','✦','◌','♙','▤'][nav.indexOf(item)]}</span><span className="nav-label">{item.label}</span>
+                <span className="nav-icon" aria-hidden="true">{['⌂','◈','↗','✦','◌','♙','▤','✉','☷'][nav.indexOf(item)]}</span><span className="nav-label">{item.label}</span>
               </NavLink>
             ))}
           </nav>
