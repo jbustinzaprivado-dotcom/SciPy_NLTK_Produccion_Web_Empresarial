@@ -59,7 +59,7 @@ export default function Clientes() {
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
             <thead>
-              <tr style={{ borderBottom: '2px solid #e2e8f0', color: '#64748b', textAlign: 'left' }}>
+              <tr style={{ borderBottom: '2px solid #e2e8f0', color: '#52676b', textAlign: 'left' }}>
                 <th style={th}>Cliente</th>
                 <th style={th}>Empresa</th>
                 <th style={th}>Correo</th>
@@ -73,8 +73,8 @@ export default function Clientes() {
                 <tr key={c.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
                   <td style={td}><strong style={{ color: '#0f172a' }}>{c.nombre}</strong></td>
                   <td style={{ ...td, color: '#475569' }}>{c.empresa}</td>
-                  <td style={{ ...td, color: '#64748b', fontFamily: 'monospace', fontSize: '0.78rem' }}>{c.correo}</td>
-                  <td style={{ ...td, color: '#64748b' }}>{c.telefono}</td>
+                  <td style={{ ...td, color: '#52676b', fontFamily: 'monospace', fontSize: '0.78rem' }}>{c.correo}</td>
+                  <td style={{ ...td, color: '#52676b' }}>{c.telefono}</td>
                   <td style={{ ...td, textAlign: 'center', fontWeight: 600, color: c.tiempo_promedio_min > 20 ? '#dc2626' : '#166534' }}>
                     {c.tiempo_promedio_min.toFixed(1)} min
                   </td>
@@ -84,7 +84,7 @@ export default function Clientes() {
             </tbody>
           </table>
         </div>
-        <p style={{ margin: '0.75rem 0 0', fontSize: '0.75rem', color: '#94a3b8' }}>
+        <p style={{ margin: '0.75rem 0 0', fontSize: '0.75rem', color: '#52676b' }}>
           Tiempos en rojo indican atencion por encima de 20 minutos (umbral de alerta).
         </p>
       </div>
@@ -92,12 +92,12 @@ export default function Clientes() {
   );
 }
 
-const card: React.CSSProperties       = { backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '1rem 1.25rem', boxSizing: 'border-box' };
+const card: React.CSSProperties       = { backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '1rem 1.25rem', boxSizing: 'border-box' };
 const pageHeader: React.CSSProperties  = { borderBottom: '1px solid #e2e8f0', paddingBottom: '1rem' };
 const h2: React.CSSProperties         = { margin: 0, fontSize: '1.5rem', fontWeight: 700, color: '#0f172a' };
-const sub: React.CSSProperties        = { margin: '0.2rem 0 0', fontSize: '0.85rem', color: '#64748b' };
-const kpiCard: React.CSSProperties    = { ...{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '0.85rem 1rem', boxSizing: 'border-box' as const } };
-const kpiLabel: React.CSSProperties   = { fontSize: '0.75rem', color: '#64748b', display: 'block' };
+const sub: React.CSSProperties        = { margin: '0.2rem 0 0', fontSize: '0.85rem', color: '#52676b' };
+const kpiCard: React.CSSProperties    = { ...{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '0.85rem 1rem', boxSizing: 'border-box' as const } };
+const kpiLabel: React.CSSProperties   = { fontSize: '0.75rem', color: '#52676b', display: 'block' };
 const kpiValue: React.CSSProperties   = { fontSize: '1.4rem', fontWeight: 700, color: '#0f172a', display: 'block', marginTop: '0.2rem' };
 const th: React.CSSProperties         = { padding: '0.5rem 0.6rem', fontWeight: 600 };
 const td: React.CSSProperties         = { padding: '0.5rem 0.6rem' };

@@ -87,12 +87,12 @@ export default function HistorialCliente() {
           <div style={card}>
             <p style={cardLabel}>Comentarios ({historial.comentarios.length})</p>
             {historial.comentarios.length === 0 ? (
-              <p style={{ fontSize: '0.82rem', color: '#64748b' }}>Este cliente no tiene comentarios registrados.</p>
+              <p style={{ fontSize: '0.82rem', color: '#52676b' }}>Este cliente no tiene comentarios registrados.</p>
             ) : (
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
                   <thead>
-                    <tr style={{ borderBottom: '2px solid #e2e8f0', color: '#64748b', textAlign: 'left' }}>
+                    <tr style={{ borderBottom: '2px solid #e2e8f0', color: '#52676b', textAlign: 'left' }}>
                       <th style={th}>Fecha</th><th style={th}>Comentario</th><th style={th}>Categoría</th><th style={th}>Estado</th>
                     </tr>
                   </thead>
@@ -115,12 +115,12 @@ export default function HistorialCliente() {
           <div style={card}>
             <p style={cardLabel}>Tiempos de atención ({historial.tiempos_atencion.length})</p>
             {historial.tiempos_atencion.length === 0 ? (
-              <p style={{ fontSize: '0.82rem', color: '#64748b' }}>Este cliente no tiene atenciones registradas.</p>
+              <p style={{ fontSize: '0.82rem', color: '#52676b' }}>Este cliente no tiene atenciones registradas.</p>
             ) : (
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
                   <thead>
-                    <tr style={{ borderBottom: '2px solid #e2e8f0', color: '#64748b', textAlign: 'left' }}>
+                    <tr style={{ borderBottom: '2px solid #e2e8f0', color: '#52676b', textAlign: 'left' }}>
                       <th style={th}>Fecha</th><th style={th}>Tiempo (min)</th>
                     </tr>
                   </thead>
@@ -142,15 +142,15 @@ export default function HistorialCliente() {
   );
 }
 
-const card: React.CSSProperties      = { backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '1rem 1.25rem', boxSizing: 'border-box' };
+const card: React.CSSProperties      = { backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '1rem 1.25rem', boxSizing: 'border-box' };
 const pageHeader: React.CSSProperties = { borderBottom: '1px solid #e2e8f0', paddingBottom: '1rem' };
 const h2: React.CSSProperties        = { margin: 0, fontSize: '1.5rem', fontWeight: 700, color: '#0f172a' };
-const sub: React.CSSProperties       = { margin: '0.2rem 0 0', fontSize: '0.85rem', color: '#64748b' };
+const sub: React.CSSProperties       = { margin: '0.2rem 0 0', fontSize: '0.85rem', color: '#52676b' };
 const cardLabel: React.CSSProperties = { margin: '0 0 0.6rem 0', fontSize: '0.85rem', fontWeight: 600, color: '#1e293b' };
 const labelSt: React.CSSProperties   = { display: 'flex', flexDirection: 'column', fontSize: '0.82rem', fontWeight: 600, color: '#475569' };
-const input: React.CSSProperties     = { padding: '0.45rem 0.6rem', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '0.85rem', width: '100%', maxWidth: '320px', boxSizing: 'border-box' };
-const kpiCard: React.CSSProperties   = { backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '0.85rem 1rem', boxSizing: 'border-box' };
-const kpiLabel: React.CSSProperties  = { fontSize: '0.75rem', color: '#64748b', display: 'block' };
+const input: React.CSSProperties     = { padding: '0.45rem 0.6rem', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.85rem', width: '100%', maxWidth: '320px', boxSizing: 'border-box' };
+const kpiCard: React.CSSProperties   = { backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '0.85rem 1rem', boxSizing: 'border-box' };
+const kpiLabel: React.CSSProperties  = { fontSize: '0.75rem', color: '#52676b', display: 'block' };
 const kpiValue: React.CSSProperties  = { fontSize: '1.2rem', fontWeight: 700, color: '#0f172a', display: 'block', marginTop: '0.2rem' };
 const th: React.CSSProperties        = { padding: '0.5rem 0.6rem', fontWeight: 600 };
 const td: React.CSSProperties        = { padding: '0.5rem 0.6rem' };

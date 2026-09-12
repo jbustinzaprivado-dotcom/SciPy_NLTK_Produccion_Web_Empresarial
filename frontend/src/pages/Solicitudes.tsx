@@ -50,7 +50,7 @@ export default function Solicitudes() {
       {cargando && <p role="status">Cargando solicitudes...</p>}
       {error && <p role="alert">{error}</p>}
       {!cargando && !error && solicitudes.length === 0 && (
-        <p style={{ fontSize: '0.85rem', color: '#64748b' }}>No hay solicitudes pendientes. Todo al día.</p>
+        <p style={{ fontSize: '0.85rem', color: '#52676b' }}>No hay solicitudes pendientes. Todo al día.</p>
       )}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -59,9 +59,9 @@ export default function Solicitudes() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', flexWrap: 'wrap' }}>
               <div>
                 <strong style={{ color: '#0f172a', fontSize: '0.9rem' }}>{s.cliente_nombre}</strong>
-                <span style={{ marginLeft: '0.6rem', fontSize: '0.75rem', color: '#64748b' }}>{s.fecha}</span>
+                <span style={{ marginLeft: '0.6rem', fontSize: '0.75rem', color: '#52676b' }}>{s.fecha}</span>
                 {s.categoria && (
-                  <span style={{ marginLeft: '0.6rem', fontSize: '0.72rem', textTransform: 'capitalize', backgroundColor: '#f1f5f9', color: '#334155', padding: '0.15rem 0.5rem', borderRadius: '4px' }}>
+                  <span style={{ marginLeft: '0.6rem', fontSize: '0.72rem', textTransform: 'capitalize', backgroundColor: '#f1f5f9', color: '#334155', padding: '0.15rem 0.5rem', borderRadius: '8px' }}>
                     {s.categoria}
                   </span>
                 )}
@@ -76,8 +76,8 @@ export default function Solicitudes() {
   );
 }
 
-const card: React.CSSProperties      = { backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '1rem 1.25rem', boxSizing: 'border-box' };
+const card: React.CSSProperties      = { backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '1rem 1.25rem', boxSizing: 'border-box' };
 const pageHeader: React.CSSProperties = { borderBottom: '1px solid #e2e8f0', paddingBottom: '1rem' };
 const h2: React.CSSProperties        = { margin: 0, fontSize: '1.5rem', fontWeight: 700, color: '#0f172a' };
-const sub: React.CSSProperties       = { margin: '0.2rem 0 0', fontSize: '0.85rem', color: '#64748b' };
-const btnDark: React.CSSProperties   = { backgroundColor: '#0f172a', color: '#fff', border: 'none', padding: '0.5rem 0.9rem', borderRadius: '4px', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer', whiteSpace: 'nowrap' };
+const sub: React.CSSProperties       = { margin: '0.2rem 0 0', fontSize: '0.85rem', color: '#52676b' };
+const btnDark: React.CSSProperties   = { backgroundColor: '#0f172a', color: '#fff', border: 'none', padding: '0.5rem 0.9rem', borderRadius: '8px', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer', whiteSpace: 'nowrap' };

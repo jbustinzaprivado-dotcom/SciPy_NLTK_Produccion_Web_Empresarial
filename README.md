@@ -2,6 +2,15 @@
 
 React + TypeScript / FastAPI / PostgreSQL 17. Paso 3: estadísticas de atenciones reales con filtros y resultados persistentes. NLP y los gráficos superiores del dashboard todavía usan ejemplos educativos.
 
+## Landing pública y contacto
+
+- `/landing`: página pública con Nosotros, Servicios y Contáctenos, con la identidad Eucalyptus del panel Centro IA. `/landing#contacto` abre el formulario; `/contactenos` redirige a esa sección. El panel conserva su inicio en `/dashboard` e incluye un enlace a Contáctenos.
+- Mapa: `frontend/src/routes/AppRoutes.tsx` define las rutas, `layouts/MainLayout.tsx` contiene el menú interno y `pages/Landing.tsx` / `Landing.css` implementan la página pública. `services/http.ts` gestiona las solicitudes.
+- El formulario llama a `POST /api/contacto` (`backend/app/api/contacto.py`). Valida nombre, correo y consulta; empresa y teléfono son opcionales. La migración nueva `database/009_schema.sql` crea `consultas_contacto`, separada de clientes, comentarios y tiempos de atención.
+- Antes de usar el formulario, aplica las migraciones con `python -m app.database.migrate` desde `backend`, con la conexión configurada, y reinicia la API. El lanzador local y Docker aplican las migraciones al iniciar.
+- Se confirma el registro después del commit. Las consultas se leen desde `/consultas` en el panel (menú Consultas web), con páginas de 20 mensajes y estados Pendiente, En atención y Atendida. `GET /api/contacto` permite paginación y `PATCH /api/contacto/{id}` guarda el estado; `010_schema.sql` agrega ese campo. No se envían correos ni se asignan automáticamente asesores. La publicación en Render se realiza por separado.
+- Pruebas de validación y fallos de guardado: `python -m pytest tests/test_contacto.py -q` desde `backend`.
+
 ## Arranque con Docker
 
 En este equipo Windows también puedes ejecutar `powershell -ExecutionPolicy Bypass -File .\Start-Local.ps1` desde la raíz. Inicia una base independiente en 127.0.0.1:55440 y la API en 127.0.0.1:8000; conserva los datos y la configuración local en `.local/` (excluida de Git). Ejecuta el comando nuevamente después de reiniciar Windows. El frontend se inicia por separado con `npm run dev` en `frontend`. Los logs quedan en `.local/api-error.log` y `.local/postgres.log`.
@@ -50,3 +59,15 @@ Frontend: `npm run typecheck`, `node --test tests/http.test.mjs`, `npm run build
 Backend: instala `pytest httpx`, configura `TEST_DATABASE_URL` hacia una base de pruebas PostgreSQL y ejecuta `python -m pytest tests -q` desde `backend`. Cada prueba crea y elimina solo un esquema propio con nombre aleatorio. Comprueba persistencia desde otro proceso, filtros, relaciones, validación y rollback.
 
 La autenticación, roles, análisis integrado y preparación de producción siguen pendientes. Usa esta etapa en desarrollo local.
+
+La bandeja de consultas requiere sesión JWT; el formulario de la landing permanece público. Prueba de persistencia: `python -m pytest tests/test_contacto_persistence.py -q` con `TEST_DATABASE_URL`; utiliza un esquema aislado y no deja consultas de prueba en la bandeja real.
+
+## Integración del repositorio de jbustinzaprivado-dotcom
+
+Se integró el commit `d07aae2`, conservando la landing React Eucalyptus y Consultas web. La landing HTML del backend también se conserva en el puerto de la API; el sitio local que usamos está en `http://127.0.0.1:5173/landing`.
+
+El panel ahora requiere login en `/login`. Los usuarios se almacenan en la base local: descargar el repositorio no copia las cuentas de Render. El repositorio incluye `/register` y `backend/create_admin.py` para preparar cuentas. El reconocimiento facial proviene del repositorio y no se ha validado como mecanismo de seguridad de producción.
+
+`Start-Local.ps1 -RestartApi` aplica migraciones y reinicia únicamente la API de este proyecto. Genera y conserva una clave JWT local en `.local/database.json`. Las migraciones locales de contacto pasaron a 009/010: el migrador reconoce sus checksums originales y actualiza el registro dentro de la misma transacción, sin recrear tablas ni eliminar consultas. Las migraciones remotas 004–008 conservan su contenido original.
+
+Se conserva el respaldo Git en `codex/respaldo-contacto-local` y una copia PostgreSQL previa en `.local/backups/pre-integracion-d07aae2.dump`. No se publicó ni se enviaron cambios a GitHub.

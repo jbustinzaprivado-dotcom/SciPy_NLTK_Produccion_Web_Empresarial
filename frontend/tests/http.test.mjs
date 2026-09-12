@@ -8,7 +8,8 @@ function moduleUrl(source) {
     compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2020 },
   }).outputText).toString('base64')}`;
 }
-const httpUrl = moduleUrl(readFileSync(new URL('../src/services/http.ts', import.meta.url), 'utf8'));
+globalThis.localStorage = { getItem: () => null, setItem: () => {}, removeItem: () => {} };
+const httpUrl = moduleUrl(readFileSync(new URL('../src/services/http.ts', import.meta.url), 'utf8').replace('import.meta.env.VITE_API_URL', "''"));
 const { requestJson } = await import(httpUrl);
 const { apiRequest } = await import(moduleUrl(readFileSync(new URL('../src/services/api.ts', import.meta.url), 'utf8').replace("'./http'", JSON.stringify(httpUrl))));
 

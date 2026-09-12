@@ -20,6 +20,7 @@ from app.api.usuarios import router as usuarios_router
 from app.api.reportes import router as reportes_router
 from app.api.tiempos_atencion import router as tiempos_atencion_router
 from app.api.landing import router as landing_router
+from app.api.contacto import router as contacto_router
 from psycopg.types.json import Jsonb
 from app.services.nltk_service import palabras_frecuentes, clasificar_texto
 
@@ -39,6 +40,7 @@ app.include_router(usuarios_router)
 app.include_router(reportes_router)
 app.include_router(tiempos_atencion_router)
 app.include_router(landing_router)
+app.include_router(contacto_router)
 
 @app.exception_handler(psycopg.Error)
 async def database_error(request: Request, exc: psycopg.Error):

@@ -71,7 +71,7 @@ export default function ReporteEstadisticas() {
               <Kpi label="Máximo" value={data.maximo} />
             </div>
           ) : (
-            <p style={{ fontSize: '0.82rem', color: '#64748b' }}>{data.interpretacion}</p>
+            <p style={{ fontSize: '0.82rem', color: '#52676b' }}>{data.interpretacion}</p>
           )}
         </div>
       )}
@@ -81,7 +81,7 @@ export default function ReporteEstadisticas() {
         <h3 style={sH3}>Arquitectura del Sistema</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.5rem' }}>
           {CAPAS.map((c) => (
-            <div key={c.capa} style={{ display: 'grid', gridTemplateColumns: '140px 1fr', gap: '1rem', backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '0.75rem 1rem', alignItems: 'center' }}>
+            <div key={c.capa} style={{ display: 'grid', gridTemplateColumns: '140px 1fr', gap: '1rem', backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '0.75rem 1rem', alignItems: 'center' }}>
               <span style={{ fontWeight: 700, fontSize: '0.85rem', color: '#0f172a' }}>{c.capa}</span>
               <span style={{ fontSize: '0.85rem', color: '#475569' }}>{c.desc}</span>
             </div>
@@ -94,7 +94,7 @@ export default function ReporteEstadisticas() {
         <div style={card}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
             <thead>
-              <tr style={{ borderBottom: '2px solid #e2e8f0', color: '#64748b', textAlign: 'left' }}>
+              <tr style={{ borderBottom: '2px solid #e2e8f0', color: '#52676b', textAlign: 'left' }}>
                 <th style={th}>Criterio</th><th style={th}>Peso</th><th style={th}>Evidencia requerida</th>
               </tr>
             </thead>
@@ -126,7 +126,7 @@ export default function ReporteEstadisticas() {
         <h3 style={sH3}>Entregables del Reto Final</h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem', marginTop: '0.5rem' }}>
           {['Codigo fuente', 'API documentada', 'Interfaz web', 'Modelo de datos', 'Pruebas', 'Informe de resultados'].map((e) => (
-            <div key={e} style={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '0.85rem 1rem', fontSize: '0.85rem', fontWeight: 500, color: '#1e293b', textAlign: 'center' }}>
+            <div key={e} style={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '0.85rem 1rem', fontSize: '0.85rem', fontWeight: 500, color: '#1e293b', textAlign: 'center' }}>
               {e}
             </div>
           ))}
@@ -138,17 +138,17 @@ export default function ReporteEstadisticas() {
 
 function Kpi({ label, value }: { label: string; value: number | null }) {
   return (
-    <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '0.7rem 0.9rem' }}>
-      <span style={{ fontSize: '0.72rem', color: '#64748b', display: 'block' }}>{label}</span>
+    <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '0.7rem 0.9rem' }}>
+      <span style={{ fontSize: '0.72rem', color: '#52676b', display: 'block' }}>{label}</span>
       <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f172a' }}>{value}</span>
     </div>
   );
 }
 
-const card: React.CSSProperties      = { backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '1rem 1.25rem', boxSizing: 'border-box' };
+const card: React.CSSProperties      = { backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '1rem 1.25rem', boxSizing: 'border-box' };
 const pageHeader: React.CSSProperties = { borderBottom: '1px solid #e2e8f0', paddingBottom: '1rem' };
 const h2: React.CSSProperties        = { margin: 0, fontSize: '1.5rem', fontWeight: 700, color: '#0f172a' };
-const sub: React.CSSProperties       = { margin: '0.2rem 0 0', fontSize: '0.85rem', color: '#64748b' };
+const sub: React.CSSProperties       = { margin: '0.2rem 0 0', fontSize: '0.85rem', color: '#52676b' };
 const cardLabel: React.CSSProperties = { margin: '0 0 0.6rem 0', fontSize: '0.85rem', fontWeight: 600, color: '#1e293b' };
 const sH3: React.CSSProperties       = { fontSize: '1rem', fontWeight: 600, color: '#1e293b', margin: '0 0 0.5rem' };
 const th: React.CSSProperties        = { padding: '0.5rem 0.6rem', fontWeight: 600 };
