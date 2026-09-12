@@ -1,9 +1,15 @@
-CREATE TABLE consultas_contacto (
+CREATE TABLE categorias (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    nombre VARCHAR(150) NOT NULL CHECK (length(trim(nombre)) > 0),
-    empresa VARCHAR(200) NOT NULL DEFAULT '',
-    correo VARCHAR(200) NOT NULL,
-    telefono VARCHAR(50) NOT NULL DEFAULT '',
-    asunto TEXT NOT NULL CHECK (length(trim(asunto)) BETWEEN 10 AND 5000),
+    nombre VARCHAR(100) NOT NULL UNIQUE,
+    descripcion TEXT,
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+INSERT INTO categorias (nombre, descripcion) VALUES
+    ('ventas', 'Consultas relacionadas a compras o cotizaciones'),
+    ('soporte', 'Solicitudes de ayuda técnica o resolución de problemas'),
+    ('reclamo', 'Quejas o insatisfacción con el servicio/producto'),
+    ('consulta', 'Preguntas generales sobre la empresa o sus servicios'),
+    ('felicitacion', 'Comentarios positivos o de agradecimiento'),
+    ('otros', 'Comentarios que no encajan en las categorías anteriores');

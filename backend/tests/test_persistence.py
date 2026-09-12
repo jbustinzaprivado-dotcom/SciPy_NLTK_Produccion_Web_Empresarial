@@ -22,10 +22,12 @@ def api(monkeypatch):
     monkeypatch.setenv("DATABASE_URL", make_conninfo(dsn, options=f"-c search_path={schema}"))
     from app.database.migrate import migrate
     from app.main import app
+    from app.core.security import crear_token
     migrate()
     migrate()  # Already applied migrations are safe to rerun.
     try:
         with TestClient(app) as client:
+            client.headers['Authorization'] = 'Bearer ' + crear_token('prueba@example.com', 'admin')
             yield client
     finally:
         with psycopg.connect(dsn, autocommit=True) as db:
@@ -40,7 +42,7 @@ def test_persistence_relations_and_filters(api):
     first = api.post('/api/comentarios', json=payload())
     assert first.status_code == 201, first.text
     row = first.json()
-    assert row['categoria'] is None and row['procesado'] is False
+    assert row['categoria'] is not None and row['procesado'] is True
     second = api.post('/api/comentarios', json=payload(fecha='2026-09-04', tiempo_atencion_minutos=17.5))
     assert second.status_code == 201
     assert second.json()['cliente_id'] == row['cliente_id']

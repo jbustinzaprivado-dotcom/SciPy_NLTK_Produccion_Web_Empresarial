@@ -1,16 +1,28 @@
-from fastapi import FastAPI, Query, Request
+from fastapi import FastAPI, Query, Request, Depends
+from datetime import date, timedelta
+from app.database.connection import get_connection
+from app.api.deps import requerir_usuario
 from fastapi.responses import JSONResponse
 import logging
 import psycopg
 from app.api.metricas import router as metricas_router
 from app.api.clientes import router as clientes_router
 from app.api.comentarios import router as comentarios_router
-from app.api.contacto import router as contacto_router
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import numpy as np
 from scipy.optimize import minimize
 from scipy.interpolate import interp1d
+from app.api.categorias import router as categorias_router
+from app.api.auth import router as auth_router
+from app.api.auditoria import router as auditoria_router
+from app.api.usuarios import router as usuarios_router
+from app.api.reportes import router as reportes_router
+from app.api.tiempos_atencion import router as tiempos_atencion_router
+from app.api.landing import router as landing_router
+from app.api.contacto import router as contacto_router
+from psycopg.types.json import Jsonb
+from app.services.nltk_service import palabras_frecuentes, clasificar_texto
 
 app = FastAPI(
     title="Empresa Inteligente - API",
@@ -21,8 +33,14 @@ app = FastAPI(
 app.include_router(metricas_router)
 app.include_router(clientes_router)
 app.include_router(comentarios_router)
+app.include_router(categorias_router)
+app.include_router(auth_router)
+app.include_router(auditoria_router)
+app.include_router(usuarios_router)
+app.include_router(reportes_router)
+app.include_router(tiempos_atencion_router)
+app.include_router(landing_router)
 app.include_router(contacto_router)
-
 
 @app.exception_handler(psycopg.Error)
 async def database_error(request: Request, exc: psycopg.Error):
@@ -62,8 +80,9 @@ def root():
     }
 
 # Ejercicio 2: Optimización de recursos con scipy.optimize.minimize
-@app.post("/api/optimizacion")
-def optimizar_costos(input_data: OptimizacionInput):
+# Ejercicio 2: Optimización de recursos con scipy.optimize.minimize
+@app.post("/api/optimizacion", dependencies=[Depends(requerir_usuario)])
+def optimizar_costos(input_data: OptimizacionInput, db=Depends(get_connection)):
     # Función de costo: 80*recurso_a + 50*recurso_b + 10*(recurso_a-3)**2
     def costo(x):
         a, b = x
@@ -83,7 +102,7 @@ def optimizar_costos(input_data: OptimizacionInput):
     recurso_b = float(res.x[1])
     costo_opt = float(res.fun)
 
-    return {
+    resultado = {
         "recurso_a": round(recurso_a, 2),
         "recurso_b": round(recurso_b, 2),
         "costo_optimo": round(costo_opt, 2),
@@ -93,93 +112,116 @@ def optimizar_costos(input_data: OptimizacionInput):
         "mensaje": "Optimización exitosa mediante scipy.optimize.minimize (SLSQP)"
     }
 
+    # Antes este resultado se calculaba y se perdía; ahora queda guardado
+    # para poder mostrarlo despues en un historial.
+    db.execute(
+        "INSERT INTO optimizaciones(nombre, parametros_entrada, resultado, costo_inicial, costo_optimizado, estado) "
+        "VALUES (%s, %s, %s, %s, %s, 'completado')",
+        ("Optimización de recursos", Jsonb(input_data.model_dump()), Jsonb(resultado), costo_ini, costo_opt),
+    )
+    db.commit()
+
+    return resultado
+
+
+@app.get("/api/optimizacion/historial", dependencies=[Depends(requerir_usuario)])
+def historial_optimizacion(limit: int = Query(20, ge=1, le=100), db=Depends(get_connection)):
+    return db.execute(
+        "SELECT id::text, nombre, parametros_entrada, resultado, costo_inicial, costo_optimizado, estado, created_at "
+        "FROM optimizaciones ORDER BY id DESC LIMIT %s",
+        (limit,),
+    ).fetchall()
+
 # Ejercicio 3: Interpolación con scipy.interpolate.interp1d
-@app.get("/api/scipy/interpolacion")
-def get_interpolacion():
-    meses_conocidos = np.array([1, 3, 4, 6])
-    ventas_conocidas = np.array([12000, 14500, 15000, 18000], dtype=float)
+# Antes usaba "ventas mensuales" de ejemplo (el PDF trae ese caso genérico),
+# pero este proyecto no tiene tabla de ventas. Lo adaptamos al dato real que
+# sí existe acá: el tiempo promedio de atención por día, rellenando los días
+# sin registros mediante interpolación lineal.
+@app.get("/api/scipy/interpolacion", dependencies=[Depends(requerir_usuario)])
+def get_interpolacion(dias: int = Query(14, ge=2, le=90), db=Depends(get_connection)):
+    hoy = date.today()
+    desde = hoy - timedelta(days=dias - 1)  # rango de N días hacia atrás, incluyendo hoy
 
-    f = interp1d(meses_conocidos, ventas_conocidas, kind="linear")
-    feb_estimado = float(f(2))
-    may_estimado = float(f(5))
+    # Traemos el promedio de tiempo_minutos por día, solo para los días que SÍ tienen registros
+    filas = db.execute(
+        "SELECT fecha, avg(tiempo_minutos)::float8 AS promedio FROM tiempos_atencion "
+        "WHERE fecha BETWEEN %s AND %s GROUP BY fecha ORDER BY fecha",
+        (desde, hoy),
+    ).fetchall()
 
-    puntos = [
-        {"mes": "Enero", "mes_num": 1, "ventas": 12000.0, "tipo": "real"},
-        {"mes": "Febrero", "mes_num": 2, "ventas": round(feb_estimado, 2), "tipo": "estimado"},
-        {"mes": "Marzo", "mes_num": 3, "ventas": 14500.0, "tipo": "real"},
-        {"mes": "Abril", "mes_num": 4, "ventas": 15000.0, "tipo": "real"},
-        {"mes": "Mayo", "mes_num": 5, "ventas": round(may_estimado, 2), "tipo": "estimado"},
-        {"mes": "Junio", "mes_num": 6, "ventas": 18000.0, "tipo": "real"}
-    ]
+    reales = {fila["fecha"]: fila["promedio"] for fila in filas}
+
+    # Con menos de 2 puntos reales no se puede trazar ninguna interpolación
+    if len(reales) < 2:
+        return {
+            "puntos": [],
+            "metodo": "scipy.interpolate.interp1d(kind='linear')",
+            "explicacion": "Se necesitan al menos 2 días con atenciones registradas en el rango para poder interpolar los huecos.",
+        }
+
+    # scipy.interpolate necesita números, no fechas: convertimos cada fecha
+    # conocida a "cuántos días pasaron desde el inicio del rango" (0, 1, 2...)
+    fechas_conocidas = sorted(reales.keys())
+    x_conocidos = [(f - desde).days for f in fechas_conocidas]
+    y_conocidos = [reales[f] for f in fechas_conocidas]
+
+    f = interp1d(x_conocidos, y_conocidos, kind="linear")
+
+    puntos = []
+    for i in range(dias):
+        fecha = desde + timedelta(days=i)
+        if fecha in reales:
+            puntos.append({"fecha": str(fecha), "tiempo_promedio": round(reales[fecha], 2), "tipo": "real"})
+        elif x_conocidos[0] <= i <= x_conocidos[-1]:
+            # Día sin registro, pero dentro del rango cubierto por datos reales: se estima
+            estimado = float(f(i))
+            puntos.append({"fecha": str(fecha), "tiempo_promedio": round(estimado, 2), "tipo": "estimado"})
+        # Los días fuera del rango de datos reales (antes del primero o después
+        # del último) se omiten: interp1d no puede extrapolar con confianza ahí.
 
     return {
         "puntos": puntos,
-        "meses_estimados": [f"Febrero (Mes 2: ${round(feb_estimado, 2):,})", f"Mayo (Mes 5: ${round(may_estimado, 2):,})"],
         "metodo": "scipy.interpolate.interp1d(kind='linear')",
-        "explicacion": "Los valores de Febrero y Mayo se calcularon por interpolación lineal matemática a partir de los datos conocidos de Enero, Marzo, Abril y Junio. Deben presentarse claramente como estimados analíticos y no como hechos consumados."
+        "explicacion": "Los días sin atenciones registradas dentro del rango se estiman por interpolación lineal a partir de los días con datos reales más cercanos. Deben presentarse como estimados, no como hechos consumados.",
     }
+
 
 # ==========================================
 # ENDPOINTS NLTK / NLP
 # ==========================================
 # Ejercicio 4: Análisis de palabras clave
-@app.get("/api/comentarios/keywords")
-def get_keywords():
-    try:
-        import nltk
-        from nltk.tokenize import word_tokenize
-        from nltk.corpus import stopwords
-        from collections import Counter
+@app.get("/api/comentarios/keywords", dependencies=[Depends(requerir_usuario)])
+def get_keywords(db=Depends(get_connection)):
+    filas = db.execute("SELECT contenido FROM comentarios ORDER BY id DESC LIMIT 200").fetchall()
+    textos = [fila["contenido"] for fila in filas]
 
-        texto = "El servicio fue rápido y el equipo brindó una excelente atención a los clientes con soluciones inmediatas"
-        tokens = word_tokenize(texto.lower(), language="spanish")
-        stop = set(stopwords.words("spanish"))
-        limpios = [t for t in tokens if t.isalpha() and t not in stop]
-        frecuentes = Counter(limpios).most_common(7)
-
-        keywords = [{"palabra": pal, "frecuencia": frec * 2 + 1} for pal, frec in frecuentes]
-    except Exception:
-        keywords = [
-            {"palabra": "servicio", "frecuencia": 12},
-            {"palabra": "atención", "frecuencia": 9},
-            {"palabra": "rápido", "frecuencia": 7},
-            {"palabra": "excelente", "frecuencia": 6},
-            {"palabra": "soporte", "frecuencia": 5},
-            {"palabra": "equipo", "frecuencia": 4},
-        ]
+    keywords = palabras_frecuentes(textos, top=7)
 
     return {"keywords": keywords, "total_palabras_clave": len(keywords)}
 
 # Ejercicio 5: Clasificador de Mensajes
-@app.post("/api/nltk/clasificar")
+@app.post("/api/nltk/clasificar", dependencies=[Depends(requerir_usuario)])
 def clasificar_ticket(data: MensajeInput):
-    msg = data.mensaje.lower()
-    palabras_reclamo = ["demora", "retraso", "queja", "reclamo", "mal", "pésimo", "lento", "error", "falla"]
-    palabras_ventas = ["precio", "costo", "cotizar", "comprar", "planes", "licencias", "venta", "adquirir"]
-    palabras_soporte = ["ayuda", "problema", "computadora", "servidor", "acceso", "configurar", "soporte", "sistema"]
+    from app.services.nltk_service import PALABRAS_RECLAMO, PALABRAS_VENTAS, PALABRAS_SOPORTE
 
-    if any(p in msg for p in palabras_reclamo):
-        cat = "reclamo"
-        conf = 0.94
-        encontradas = [p for p in palabras_reclamo if p in msg]
-    elif any(p in msg for p in palabras_ventas):
-        cat = "ventas"
-        conf = 0.91
-        encontradas = [p for p in palabras_ventas if p in msg]
+    msg = data.mensaje.lower()
+    categoria, confianza = clasificar_texto(data.mensaje)
+
+    if categoria == "reclamo":
+        encontradas = [p for p in PALABRAS_RECLAMO if p in msg]
+    elif categoria == "ventas":
+        encontradas = [p for p in PALABRAS_VENTAS if p in msg]
     else:
-        cat = "soporte"
-        conf = 0.86
-        encontradas = [p for p in palabras_soporte if p in msg] or ["general"]
+        encontradas = [p for p in PALABRAS_SOPORTE if p in msg] or ["general"]
 
     return {
         "mensaje": data.mensaje,
-        "categoria": cat,
-        "confianza": conf,
+        "categoria": categoria,
+        "confianza": confianza,
         "palabras_clave_detectadas": encontradas
     }
-
 # Ejercicio 6: Buscador inteligente de servicios
-@app.get("/api/nltk/buscar")
+@app.get("/api/nltk/buscar", dependencies=[Depends(requerir_usuario)])
 def buscar_servicios(q: str = Query("")):
     servicios = [
         {

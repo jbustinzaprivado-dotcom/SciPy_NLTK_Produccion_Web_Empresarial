@@ -3,6 +3,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field
 from app.database.connection import get_connection
 from app.database.models import Name
+from app.api.deps import requerir_usuario
 
 router = APIRouter(prefix="/api/contacto", tags=["Contacto"])
 
@@ -14,12 +15,12 @@ class EstadoConsulta(BaseModel):
     estado: Literal['pendiente', 'en_atencion', 'atendida']
 
 
-@router.get("")
+@router.get("", dependencies=[Depends(requerir_usuario)])
 def listar_consultas(limit: int = Query(50, ge=1, le=100), offset: int = Query(0, ge=0), db=Depends(get_connection)):
     return db.execute(SELECT_CONSULTAS + " ORDER BY created_at DESC, id DESC LIMIT %s OFFSET %s", (limit, offset)).fetchall()
 
 
-@router.patch("/{consulta_id}")
+@router.patch("/{consulta_id}", dependencies=[Depends(requerir_usuario)])
 def actualizar_consulta(consulta_id: int, data: EstadoConsulta, db=Depends(get_connection)):
     result = db.execute("UPDATE consultas_contacto SET estado = %s WHERE id = %s RETURNING id", (data.estado, consulta_id)).fetchone()
     if not result:

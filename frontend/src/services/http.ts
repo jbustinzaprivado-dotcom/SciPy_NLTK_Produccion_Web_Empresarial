@@ -1,7 +1,46 @@
+const TOKEN_KEY = 'auth_token';
+
+// En local queda vacío (Vite usa su proxy /api -> localhost:8000).
+// En producción (Vercel), se configura VITE_API_URL con la URL del backend real.
+const API_BASE = import.meta.env.VITE_API_URL || '';
+
+export function getToken(): string | null {
+  return localStorage.getItem(TOKEN_KEY);
+}
+
+export function setToken(token: string): void {
+  localStorage.setItem(TOKEN_KEY, token);
+}
+
+export function clearToken(): void {
+  localStorage.removeItem(TOKEN_KEY);
+}
+
 export async function requestJson<T>(url: string, options: RequestInit = {}): Promise<T> {
+  const fullUrl = url.startsWith('/api') ? `${API_BASE}${url}` : url;
   const headers = new Headers(options.headers);
   if (options.body && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
-  const response = await fetch(url, { ...options, headers });
+  const token = getToken();
+  if (token) headers.set('Authorization', `Bearer ${token}`);
+  const response = await fetch(fullUrl, { ...options, headers });
+  if (response.status === 401) {
+    clearToken();
+    window.location.href = '/login';
+    throw new Error('Sesión expirada');
+  }
   if (!response.ok) throw new Error(`La solicitud fue rechazada (HTTP ${response.status}).`);
+  return response.json();
+}
+// Para endpoints de login/registro: a diferencia de requestJson, un 401 acá
+// significa "credenciales invalidas", no "sesion expirada" — no debe redirigir.
+export async function requestPublicJson<T>(url: string, options: RequestInit = {}): Promise<T> {
+  const fullUrl = url.startsWith('/api') ? `${API_BASE}${url}` : url;
+  const headers = new Headers(options.headers);
+  if (options.body && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
+  const response = await fetch(fullUrl, { ...options, headers });
+  if (!response.ok) {
+    const data = await response.json().catch(() => null);
+    throw new Error(data?.detail || `La solicitud fue rechazada (HTTP ${response.status}).`);
+  }
   return response.json();
 }

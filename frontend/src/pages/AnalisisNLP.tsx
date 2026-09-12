@@ -19,13 +19,15 @@ export default function AnalisisNLP() {
   const [buscado, setBuscado] = useState(false);
   const [mensajeAnalizado, setMensajeAnalizado] = useState('');
 
-  const clasificar = async (e: React.FormEvent) => {
+    const clasificar = async (e: React.FormEvent) => {
     e.preventDefault();
     setCargClasif(true); setClasif(null); setErrorClasif('');
     try {
-      const r = await fetch('/api/nltk/clasificar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mensaje }) });
-      if (!r.ok) throw new Error('offline');
-      setClasif(await r.json()); setMensajeAnalizado(mensaje);
+      const data = await requestJson<ClasifResult>('/api/nltk/clasificar', {
+        method: 'POST',
+        body: JSON.stringify({ mensaje }),
+      });
+      setClasif(data); setMensajeAnalizado(mensaje);
     } catch {
       setErrorClasif('No se pudo clasificar el mensaje. Inténtalo de nuevo.');
     } finally {

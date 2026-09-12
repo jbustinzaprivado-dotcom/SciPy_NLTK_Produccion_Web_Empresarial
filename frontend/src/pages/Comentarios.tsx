@@ -32,13 +32,12 @@ export default function Comentarios() {
   const cargar = async () => {
     setErrorCarga('');
     try {
-      const [rK, rC] = await Promise.all([
-        fetch('/api/comentarios/keywords'),
-        fetch(fechaFiltro ? `/api/comentarios?fecha=${fechaFiltro}` : '/api/comentarios'),
+      const [kd, comentariosData] = await Promise.all([
+        requestJson<{ keywords: Keyword[] }>('/api/comentarios/keywords'),
+        requestJson<Comentario[]>(fechaFiltro ? `/api/comentarios?fecha=${fechaFiltro}` : '/api/comentarios'),
       ]);
-      if (!rK.ok || !rC.ok) throw new Error('offline');
-      const kd = await rK.json(); setKeywords(kd.keywords ?? []);
-      setComentarios(await rC.json());
+      setKeywords(kd.keywords ?? []);
+      setComentarios(comentariosData);
       setOnline(true);
     } catch {
       setOnline(false);

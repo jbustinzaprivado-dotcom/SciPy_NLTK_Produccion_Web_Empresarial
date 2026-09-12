@@ -1,6 +1,6 @@
 from datetime import date
 from decimal import Decimal
-from typing import Annotated
+from typing import Annotated, Literal
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
 
 Name = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=150)]
@@ -28,3 +28,24 @@ class ComentarioNuevo(BaseModel):
         if self.cliente_id is None and self.cliente_nombre is None:
             raise ValueError("Indica cliente_id o cliente_nombre")
         return self
+class CategoriaNueva(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+    nombre: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=100)]
+    descripcion: str = Field(default="", max_length=500)
+
+class LoginRequest(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+    email: str = Field(min_length=1, max_length=200)
+    password: str = Field(min_length=1)
+class UsuarioNuevo(BaseModel):
+    # Modelo para crear un usuario nuevo desde el panel de administración
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+    nombre: Name
+    email: str = Field(min_length=1, max_length=200)
+    password: str = Field(min_length=8, max_length=200)
+    rol: Literal["admin", "analista", "supervisor", "usuario"] = "usuario"
+
+class EstadoUsuario(BaseModel):
+    # Modelo para activar/desactivar un usuario existente
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+    activo: bool

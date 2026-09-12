@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { requestJson } from '../services/http';
 
 const CRITERIOS = [
   { criterio: 'Conceptos de SciPy',  peso: '15%', evidencia: 'Explicacion y seleccion correcta de modulos.' },
@@ -26,17 +27,56 @@ const PRACTICAS = [
   'Para funciones criticas, agregar pruebas unitarias con datos reales anonimizados.',
 ];
 
-export default function Reportes() {
+interface ReporteEstadisticasData {
+  media: number | null;
+  mediana: number | null;
+  desviacion_estandar: number | null;
+  minimo: number | null;
+  maximo: number | null;
+  total_registros: number;
+  interpretacion: string;
+}
+
+export default function ReporteEstadisticas() {
+  const [data, setData] = useState<ReporteEstadisticasData | null>(null);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    requestJson<{ estadisticas: ReporteEstadisticasData }>('/api/reportes')
+      .then((r) => setData(r.estadisticas))
+      .catch(() => setError('No se pudo cargar el reporte de estadísticas.'));
+  }, []);
+
   return (
     <div className="page-shell" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-      <header className="page-header" style={pageHeader}>
+      <header style={pageHeader}>
         <div>
-          <h2 style={h2}>Reporte Ejecutivo Consolidado</h2>
-          <p style={sub}>Proyecto integrador — Portal web empresarial inteligente (SENATI)</p>
+          <h2 style={h2}>Reporte de Estadísticas</h2>
+          <p style={sub}>Análisis SciPy de los tiempos de atención registrados</p>
         </div>
       </header>
 
-      {/* Arquitectura */}
+      {error && <p role="alert">{error}</p>}
+      {!data && !error && <p role="status">Cargando...</p>}
+
+      {data && (
+        <div style={card}>
+          <p style={cardLabel}>Atenciones analizadas: {data.total_registros}</p>
+          {data.media !== null ? (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem', marginTop: '0.5rem' }}>
+              <Kpi label="Media (min)" value={data.media} />
+              <Kpi label="Mediana (min)" value={data.mediana} />
+              <Kpi label="Desv. estándar" value={data.desviacion_estandar} />
+              <Kpi label="Mínimo" value={data.minimo} />
+              <Kpi label="Máximo" value={data.maximo} />
+            </div>
+          ) : (
+            <p style={{ fontSize: '0.82rem', color: '#64748b' }}>{data.interpretacion}</p>
+          )}
+        </div>
+      )}
+
+      {/* Contenido de referencia del proyecto (no son datos en vivo) */}
       <section>
         <h3 style={sH3}>Arquitectura del Sistema</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.5rem' }}>
@@ -49,7 +89,6 @@ export default function Reportes() {
         </div>
       </section>
 
-      {/* Criterios de evaluacion */}
       <section>
         <h3 style={sH3}>Criterios de Evaluacion</h3>
         <div style={card}>
@@ -72,7 +111,6 @@ export default function Reportes() {
         </div>
       </section>
 
-      {/* Buenas practicas */}
       <section>
         <h3 style={sH3}>Buenas Practicas para Produccion</h3>
         <div style={card}>
@@ -84,7 +122,6 @@ export default function Reportes() {
         </div>
       </section>
 
-      {/* Entregables */}
       <section>
         <h3 style={sH3}>Entregables del Reto Final</h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem', marginTop: '0.5rem' }}>
@@ -99,10 +136,20 @@ export default function Reportes() {
   );
 }
 
-const card: React.CSSProperties       = { backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '1rem 1.25rem', boxSizing: 'border-box' };
-const pageHeader: React.CSSProperties  = { borderBottom: '1px solid #e2e8f0', paddingBottom: '1rem' };
-const h2: React.CSSProperties         = { margin: 0, fontSize: '1.5rem', fontWeight: 700, color: '#0f172a' };
-const sub: React.CSSProperties        = { margin: '0.2rem 0 0', fontSize: '0.85rem', color: '#64748b' };
-const sH3: React.CSSProperties        = { fontSize: '1rem', fontWeight: 600, color: '#1e293b', margin: '0 0 0.5rem' };
-const th: React.CSSProperties         = { padding: '0.5rem 0.6rem', fontWeight: 600 };
-const td: React.CSSProperties         = { padding: '0.5rem 0.6rem' };
+function Kpi({ label, value }: { label: string; value: number | null }) {
+  return (
+    <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '0.7rem 0.9rem' }}>
+      <span style={{ fontSize: '0.72rem', color: '#64748b', display: 'block' }}>{label}</span>
+      <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f172a' }}>{value}</span>
+    </div>
+  );
+}
+
+const card: React.CSSProperties      = { backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '1rem 1.25rem', boxSizing: 'border-box' };
+const pageHeader: React.CSSProperties = { borderBottom: '1px solid #e2e8f0', paddingBottom: '1rem' };
+const h2: React.CSSProperties        = { margin: 0, fontSize: '1.5rem', fontWeight: 700, color: '#0f172a' };
+const sub: React.CSSProperties       = { margin: '0.2rem 0 0', fontSize: '0.85rem', color: '#64748b' };
+const cardLabel: React.CSSProperties = { margin: '0 0 0.6rem 0', fontSize: '0.85rem', fontWeight: 600, color: '#1e293b' };
+const sH3: React.CSSProperties       = { fontSize: '1rem', fontWeight: 600, color: '#1e293b', margin: '0 0 0.5rem' };
+const th: React.CSSProperties        = { padding: '0.5rem 0.6rem', fontWeight: 600 };
+const td: React.CSSProperties        = { padding: '0.5rem 0.6rem' };

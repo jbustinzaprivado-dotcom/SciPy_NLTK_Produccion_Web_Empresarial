@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { requestJson } from '../services/http';
+import { requestPublicJson } from '../services/http';
 import './Landing.css';
 
 const services = [
@@ -38,7 +38,7 @@ export default function Landing() {
     setSending(true);
     setNotice(null);
     try {
-      const result = await requestJson<{ id: string }>('/api/contacto', { method: 'POST', body: JSON.stringify(data), signal: AbortSignal.timeout(20000) });
+      const result = await requestPublicJson<{ id: string }>('/api/contacto', { method: 'POST', body: JSON.stringify(data), signal: AbortSignal.timeout(20000) });
       setNotice({ error: false, text: `Gracias por escribirnos. Tu consulta ha sido registrada con el número ${result.id}.` });
       form.reset();
     } catch {
