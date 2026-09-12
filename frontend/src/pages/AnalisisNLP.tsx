@@ -85,14 +85,14 @@ export default function AnalisisNLP() {
             <div style={card}>
               <h3 style={sH3}>Resultado de la Clasificacion</h3>
               <div style={{ textAlign: 'center', padding: '1.5rem 0' }}>
-                <div style={{ display: 'inline-block', padding: '0.5rem 1.5rem', borderRadius: '4px', fontSize: '1.25rem', fontWeight: 700, backgroundColor: categoriaBg[clasif.categoria] ?? '#f8fafc', color: categoriaColor[clasif.categoria] ?? '#334155', border: `2px solid ${categoriaColor[clasif.categoria] ?? '#e2e8f0'}`, textTransform: 'capitalize' }}>
+                <div style={{ display: 'inline-block', padding: '0.5rem 1.5rem', borderRadius: '8px', fontSize: '1.25rem', fontWeight: 700, backgroundColor: categoriaBg[clasif.categoria] ?? '#f8fafc', color: categoriaColor[clasif.categoria] ?? '#334155', border: `2px solid ${categoriaColor[clasif.categoria] ?? '#e2e8f0'}`, textTransform: 'capitalize' }}>
                   {clasif.categoria}
                 </div>
-                <p style={{ margin: '0.75rem 0 0', fontSize: '0.85rem', color: '#64748b' }}>
+                <p style={{ margin: '0.75rem 0 0', fontSize: '0.85rem', color: '#52676b' }}>
                   Confianza: <strong>{(clasif.confianza * 100).toFixed(0)}%</strong>
                 </p>
               </div>
-              <div style={{ backgroundColor: '#f8fafc', borderRadius: '4px', padding: '0.6rem 0.8rem', fontSize: '0.78rem', color: '#475569', fontFamily: 'monospace' }}>
+              <div style={{ backgroundColor: '#f8fafc', borderRadius: '8px', padding: '0.6rem 0.8rem', fontSize: '0.78rem', color: '#475569', fontFamily: 'monospace' }}>
                 Mensaje analizado: "{mensajeAnalizado.slice(0, 60)}{mensajeAnalizado.length > 60 ? '...' : ''}"
               </div>
             </div>
@@ -118,7 +118,7 @@ export default function AnalisisNLP() {
           {resultados.length > 0 && (
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
               <thead>
-                <tr style={{ borderBottom: '1px solid #cbd5e1', color: '#64748b', textAlign: 'left' }}>
+                <tr style={{ borderBottom: '1px solid #cbd5e1', color: '#52676b', textAlign: 'left' }}>
                   <th style={th}>Servicio encontrado</th>
                   <th style={th}>Relevancia</th>
                 </tr>
@@ -147,19 +147,19 @@ function SectionTitle({ title, badge }: { title: string; badge: string }) {
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
       <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#1e293b', margin: 0 }}>{title}</h3>
-      <code style={{ fontSize: '0.7rem', color: '#64748b', fontFamily: 'monospace', backgroundColor: '#f1f5f9', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>{badge}</code>
+      <code style={{ fontSize: '0.7rem', color: '#52676b', fontFamily: 'monospace', backgroundColor: '#f1f5f9', padding: '0.2rem 0.5rem', borderRadius: '8px' }}>{badge}</code>
     </div>
   );
 }
 
-const card: React.CSSProperties       = { backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '1rem 1.25rem', boxSizing: 'border-box' };
+const card: React.CSSProperties       = { backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '1rem 1.25rem', boxSizing: 'border-box' };
 const pageHeader: React.CSSProperties  = { borderBottom: '1px solid #e2e8f0', paddingBottom: '1rem' };
 const h2: React.CSSProperties         = { margin: 0, fontSize: '1.5rem', fontWeight: 700, color: '#0f172a' };
-const sub: React.CSSProperties        = { margin: '0.2rem 0 0', fontSize: '0.85rem', color: '#64748b' };
+const sub: React.CSSProperties        = { margin: '0.2rem 0 0', fontSize: '0.85rem', color: '#52676b' };
 const sH3: React.CSSProperties        = { fontSize: '0.95rem', fontWeight: 600, color: '#1e293b', margin: '0 0 0.5rem' };
-const desc: React.CSSProperties       = { fontSize: '0.82rem', color: '#64748b', margin: '0 0 0.75rem' };
+const desc: React.CSSProperties       = { fontSize: '0.82rem', color: '#52676b', margin: '0 0 0.75rem' };
 const labelSt: React.CSSProperties    = { fontSize: '0.82rem', fontWeight: 600, color: '#475569', display: 'flex', flexDirection: 'column' };
-const input: React.CSSProperties      = { padding: '0.45rem 0.6rem', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '0.85rem', width: '100%', boxSizing: 'border-box' };
-const btnDark: React.CSSProperties    = { backgroundColor: '#0f172a', color: '#fff', border: 'none', padding: '0.5rem 1rem', borderRadius: '4px', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' };
+const input: React.CSSProperties      = { padding: '0.45rem 0.6rem', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.85rem', width: '100%', boxSizing: 'border-box' };
+const btnDark: React.CSSProperties    = { backgroundColor: '#0f172a', color: '#fff', border: 'none', padding: '0.5rem 1rem', borderRadius: '8px', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' };
 const th: React.CSSProperties         = { padding: '0.4rem', fontWeight: 600 };
 const td: React.CSSProperties         = { padding: '0.4rem' };

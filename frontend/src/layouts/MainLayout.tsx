@@ -1,3 +1,4 @@
+import Icon from '../components/Icon';
 import React, { useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 
@@ -6,42 +7,42 @@ type NavItem = { to: string; label: string; icon: string; end?: boolean };
 type NavGroup = { titulo: string; items: NavItem[] };
 
 // Item suelto, fuera de cualquier grupo (como "Inicio" en el dashboard de referencia)
-const inicio: NavItem = { to: '/dashboard', label: 'Dashboard', icon: '⌂' };
+const inicio: NavItem = { to: '/dashboard', label: 'Dashboard', icon: 'home' };
 
 // Agrupacion por area funcional, siguiendo la estructura del documento de arquitectura
 const grupos: NavGroup[] = [
   { titulo: 'Clientes', items: [
-    { to: '/clientes', label: 'Lista de clientes', icon: '♙', end: true },
-    { to: '/clientes/nuevo', label: 'Nuevo cliente', icon: '✚' },
-    { to: '/clientes/historial', label: 'Historial', icon: '⏳' },
+    { to: '/clientes', label: 'Lista de clientes', icon: 'users', end: true },
+    { to: '/clientes/nuevo', label: 'Nuevo cliente', icon: 'plus' },
+    { to: '/clientes/historial', label: 'Historial', icon: 'clock' },
   ]},
   { titulo: 'Atención', items: [
-    { to: '/consultas', label: 'Consultas web', icon: '✉' },
-    { to: '/landing#contacto', label: 'Contáctenos', icon: '↗' },
-    { to: '/solicitudes', label: 'Solicitudes', icon: '◔' },
-    { to: '/comentarios', label: 'Comentarios', icon: '✦' },
-    { to: '/tiempos-atencion', label: 'Tiempos de atención', icon: '⏲' },
+    { to: '/consultas', label: 'Consultas web', icon: 'mail' },
+    { to: '/landing#contacto', label: 'Contáctenos', icon: 'arrow' },
+    { to: '/solicitudes', label: 'Solicitudes', icon: 'message' },
+    { to: '/comentarios', label: 'Comentarios', icon: 'message' },
+    { to: '/tiempos-atencion', label: 'Tiempos de atención', icon: 'clock' },
   ]},
   { titulo: 'Inteligencia NLP', items: [
-    { to: '/analizar-comentario', label: 'Analizar comentario', icon: '◍' },
-    { to: '/palabras-frecuentes', label: 'Palabras frecuentes', icon: '❋' },
-    { to: '/analisis-nlp', label: 'Clasificación', icon: '◌' },
-    { to: '/categorias', label: 'Categorías', icon: '☰' },
+    { to: '/analizar-comentario', label: 'Analizar comentario', icon: 'search' },
+    { to: '/palabras-frecuentes', label: 'Palabras frecuentes', icon: 'document' },
+    { to: '/analisis-nlp', label: 'Clasificación', icon: 'grid' },
+    { to: '/categorias', label: 'Categorías', icon: 'grid' },
   ]},
   { titulo: 'Scientific Data', items: [
-    { to: '/metricas', label: 'Estadísticas', icon: '◈' },
-    { to: '/interpolacion', label: 'Interpolación', icon: '∿' },
-    { to: '/optimizacion', label: 'Optimización', icon: '↗' },
+    { to: '/metricas', label: 'Estadísticas', icon: 'chart' },
+    { to: '/interpolacion', label: 'Interpolación', icon: 'chart' },
+    { to: '/optimizacion', label: 'Optimización', icon: 'arrow' },
   ]},
   { titulo: 'Reportes', items: [
-    { to: '/reportes/atencion', label: 'Atención', icon: '◔' },
-    { to: '/reportes/nlp', label: 'NLP', icon: '❋' },
-    { to: '/reportes/estadisticas', label: 'Estadísticas', icon: '▤' },
+    { to: '/reportes/atencion', label: 'Atención', icon: 'message' },
+    { to: '/reportes/nlp', label: 'NLP', icon: 'document' },
+    { to: '/reportes/estadisticas', label: 'Estadísticas', icon: 'document' },
   ]},
   { titulo: 'Configuración', items: [
-    { to: '/categorias', label: 'Categorías', icon: '☰' },
-    { to: '/auditoria', label: 'Auditoría', icon: '⏱' },
-    { to: '/usuarios', label: 'Usuarios', icon: '⚙' },
+    { to: '/categorias', label: 'Categorías', icon: 'grid' },
+    { to: '/auditoria', label: 'Auditoría', icon: 'clock' },
+    { to: '/usuarios', label: 'Usuarios', icon: 'users' },
   ]},
 ];
 
@@ -70,10 +71,10 @@ export default function MainLayout() {
     <div className={`app-shell theme-${theme}`}>
       <aside className="sidebar">
         <div className="brand"><div className="brand-mark">CI</div><div className="brand-copy"><div className="brand-name">Centro IA</div><div className="brand-sub">Atención empresarial</div></div></div>
-        <div className="profile"><div className="profile-avatar">◉</div><strong>Panel ejecutivo</strong><span>operaciones@empresa.com</span></div>
+        <div className="profile"><div className="profile-avatar"><Icon name="users" size={24} /></div><strong>Panel ejecutivo</strong><span>Espacio de trabajo</span></div>
         <nav className="nav" aria-label="Navegación principal">
           <NavLink to={inicio.to} className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
-            <span className="nav-icon">{inicio.icon}</span><span className="nav-label">{inicio.label}</span>
+            <span className="nav-icon"><Icon name={inicio.icon} /></span><span className="nav-label">{inicio.label}</span>
           </NavLink>
 
           {grupos.map((grupo) => {
@@ -87,7 +88,7 @@ export default function MainLayout() {
                   aria-expanded={abierto}
                 >
                   <span>{grupo.titulo.toUpperCase()}</span>
-                  <span className="nav-group-caret">{abierto ? '▾' : '▸'}</span>
+                  <span className="nav-group-caret"><Icon name="chevron" size={14} /></span>
                 </button>
                 {abierto && (
                   <div className="nav-group-items">
@@ -99,7 +100,7 @@ export default function MainLayout() {
                         aria-label={item.label}
                         className={({ isActive }) => `nav-link nav-sublink${isActive ? ' active' : ''}`}
                       >
-                        <span className="nav-icon">{item.icon}</span><span className="nav-label">{item.label}</span>
+                        <span className="nav-icon"><Icon name={item.icon} /></span><span className="nav-label">{item.label}</span>
                       </NavLink>
                     ))}
                   </div>
@@ -116,7 +117,7 @@ export default function MainLayout() {
             {themes[themeIndex].swatches.slice(0, 4).map((color) => <i key={color} style={{ backgroundColor: color }} />)}
           </div>
           <button type="button" className="theme-button" onClick={() => setTheme(nextTheme.id)} aria-label={`Cambiar al tema ${nextTheme.name}`}>
-            <span>{themes[themeIndex].name}</span><b>↻</b>
+            <span>{themes[themeIndex].name}</span><Icon name="refresh" size={15} />
           </button>
         </div>
         <Outlet />

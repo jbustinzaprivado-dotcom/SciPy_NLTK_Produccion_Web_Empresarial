@@ -93,12 +93,12 @@ export default function Dashboard() {
       {/* Cabecera */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '1.25rem' }}>
         <div>
-          <p style={{ margin: 0, fontSize: '0.75rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Panel de Control Ejecutivo</p>
+          <p style={{ margin: 0, fontSize: '0.75rem', fontWeight: 600, color: '#52676b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Panel de Control Ejecutivo</p>
           <h2 style={{ margin: '0.2rem 0 0.25rem', fontSize: '1.5rem', fontWeight: 700, color: '#0f172a' }}>Centro Inteligente de Atencion</h2>
-          <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>SciPy (calculo numerico) + NLTK (procesamiento de texto) en arquitectura desacoplada.</p>
+          <p style={{ margin: 0, fontSize: '0.85rem', color: '#52676b' }}>SciPy (calculo numerico) + NLTK (procesamiento de texto) en arquitectura desacoplada.</p>
         </div>
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-          <span style={{ fontSize: '0.78rem', padding: '0.3rem 0.7rem', borderRadius: '4px', border: '1px solid #e2e8f0', backgroundColor: online ? '#f0fdf4' : '#f8fafc', color: online ? '#166534' : '#475569', fontWeight: 500 }}>
+          <span style={{ fontSize: '0.78rem', padding: '0.3rem 0.7rem', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: online ? '#f0fdf4' : '#f8fafc', color: online ? '#166534' : '#475569', fontWeight: 500 }}>
             {online === null ? 'Conectando...' : online ? 'Backend Activo (:8000)' : 'Sin conexión'}
           </span>
           <button onClick={cargar} style={btnDark}>Actualizar</button>
@@ -142,7 +142,7 @@ export default function Dashboard() {
         <div style={card}>
           <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
             {keywords.map((k) => (
-              <span key={k.palabra} style={{ backgroundColor: '#f1f5f9', border: '1px solid #e2e8f0', padding: '0.25rem 0.65rem', borderRadius: '4px', fontSize: '0.82rem' }}>
+              <span key={k.palabra} style={{ backgroundColor: '#f1f5f9', border: '1px solid #e2e8f0', padding: '0.25rem 0.65rem', borderRadius: '8px', fontSize: '0.82rem' }}>
                 {k.palabra} <strong>({k.frecuencia})</strong>
               </span>
             ))}
@@ -171,7 +171,7 @@ export default function Dashboard() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
               <p style={cardLabel}>Atenciones registradas</p>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <label style={{ fontSize: '0.78rem', color: '#64748b' }}>Fecha:</label>
+                <label style={{ fontSize: '0.78rem', color: '#52676b' }}>Fecha:</label>
                 <input type="date" value={fechaFiltro} onChange={(e) => setFechaFiltro(e.target.value)} style={{ ...input, width: 'auto', padding: '0.25rem 0.4rem' }} />
                 {fechaFiltro && <button onClick={() => setFechaFiltro('')} style={{ background: 'none', border: 'none', color: '#0284c7', fontSize: '0.78rem', cursor: 'pointer' }}>Limpiar</button>}
               </div>
@@ -179,7 +179,7 @@ export default function Dashboard() {
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
                 <thead>
-                  <tr style={{ borderBottom: '1px solid #cbd5e1', color: '#64748b', textAlign: 'left' }}>
+                  <tr style={{ borderBottom: '1px solid #cbd5e1', color: '#52676b', textAlign: 'left' }}>
                     <th style={th}>Cliente</th><th style={th}>Fecha</th><th style={th}>Tiempo</th><th style={th}>Comentario</th>
                   </tr>
                 </thead>
@@ -187,7 +187,7 @@ export default function Dashboard() {
                   {comentarios.map((c) => (
                     <tr key={c.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
                       <td style={td}><strong>{c.cliente_nombre}</strong></td>
-                      <td style={{ ...td, color: '#64748b' }}>{c.fecha}</td>
+                      <td style={{ ...td, color: '#52676b' }}>{c.fecha}</td>
                       <td style={td}>{c.tiempo_atencion_minutos} min</td>
                       <td style={{ ...td, color: '#334155' }}>{c.comentario}</td>
                     </tr>
@@ -206,7 +206,7 @@ export default function Dashboard() {
           {MODULOS.map((m) => (
             <Link key={m.to} to={m.to} style={{ textDecoration: 'none', ...card, display: 'block' }}>
               <span style={{ fontWeight: 600, fontSize: '0.9rem', color: '#0f172a', display: 'block' }}>{m.title}</span>
-              <span style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.25rem', display: 'block' }}>{m.desc}</span>
+              <span style={{ fontSize: '0.75rem', color: '#52676b', marginTop: '0.25rem', display: 'block' }}>{m.desc}</span>
             </Link>
           ))}
         </div>
@@ -219,7 +219,7 @@ export default function Dashboard() {
 function KpiCard({ label, value, code, sub }: { label: string; value: string; code?: string; sub?: string }) {
   return (
     <div style={card}>
-      <span style={{ fontSize: '0.78rem', color: '#64748b', display: 'block' }}>{label}</span>
+      <span style={{ fontSize: '0.78rem', color: '#52676b', display: 'block' }}>{label}</span>
       <span style={{ fontSize: '1.6rem', fontWeight: 700, color: '#0f172a', display: 'block', margin: '0.25rem 0' }}>{value}</span>
       {code && <code style={{ fontSize: '0.72rem', color: '#0284c7', fontFamily: 'monospace' }}>{code}</code>}
       {sub  && <span style={{ fontSize: '0.72rem', color: '#059669', display: 'block', marginTop: '0.2rem' }}>{sub}</span>}
@@ -228,11 +228,11 @@ function KpiCard({ label, value, code, sub }: { label: string; value: string; co
 }
 
 /* ── estilos ── */
-const card: React.CSSProperties  = { backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '1rem', boxSizing: 'border-box' };
+const card: React.CSSProperties  = { backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '1rem', boxSizing: 'border-box' };
 const sectionTitle: React.CSSProperties = { fontSize: '1rem', fontWeight: 600, color: '#1e293b', margin: 0 };
-const badge: React.CSSProperties = { fontSize: '0.72rem', color: '#64748b', fontFamily: 'monospace', backgroundColor: '#f1f5f9', padding: '0.2rem 0.5rem', borderRadius: '4px' };
+const badge: React.CSSProperties = { fontSize: '0.72rem', color: '#52676b', fontFamily: 'monospace', backgroundColor: '#f1f5f9', padding: '0.2rem 0.5rem', borderRadius: '8px' };
 const cardLabel: React.CSSProperties = { margin: '0 0 0.6rem 0', fontSize: '0.85rem', fontWeight: 600, color: '#1e293b' };
-const input: React.CSSProperties = { width: '100%', padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '0.85rem', boxSizing: 'border-box' };
-const btnDark: React.CSSProperties = { backgroundColor: '#0f172a', color: '#fff', border: 'none', padding: '0.5rem 1rem', borderRadius: '4px', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' };
+const input: React.CSSProperties = { width: '100%', padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.85rem', boxSizing: 'border-box' };
+const btnDark: React.CSSProperties = { backgroundColor: '#0f172a', color: '#fff', border: 'none', padding: '0.5rem 1rem', borderRadius: '8px', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' };
 const th: React.CSSProperties = { padding: '0.4rem', fontWeight: 600 };
 const td: React.CSSProperties = { padding: '0.4rem' };
