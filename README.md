@@ -100,3 +100,13 @@ en el entorno Python del backend se instalan con
 `python -m nltk.downloader punkt_tab stopwords`. Si faltan, el envío devuelve 503
 sin guardar registros parciales. Para activar localmente una actualización:
 `powershell -ExecutionPolicy Bypass -File .\Start-Local.ps1 -RestartApi`.
+
+
+Al iniciar FastAPI se aplican las migraciones pendientes y se integran automáticamente
+las consultas antiguas sin comentario vinculado, antes de aceptar peticiones.
+Esto funciona también con el comando habitual `uvicorn app.main:app` de Render;
+no hace falta ejecutar una consola manual para completar el análisis histórico.
+Un bloqueo transaccional evita duplicados entre procesos de arranque y cada reinicio
+omite las consultas ya integradas. Conserva fecha y estado y no inventa tiempos de atención.
+Si falla la base o faltan recursos NLTK, el arranque falla sin guardar una integración parcial;
+revisar los logs y los recursos del entorno antes de reintentar el despliegue.

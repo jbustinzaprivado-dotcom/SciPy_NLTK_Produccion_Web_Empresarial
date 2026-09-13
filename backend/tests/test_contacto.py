@@ -6,7 +6,8 @@ from app.database.connection import get_connection
 
 
 @pytest.fixture
-def contact_api():
+def contact_api(monkeypatch):
+    monkeypatch.setattr("app.main.preparar_datos", lambda: None)
     db = MagicMock()
     db.execute.return_value.fetchone.return_value = {"id": "12"}
     app.dependency_overrides[get_connection] = lambda: db

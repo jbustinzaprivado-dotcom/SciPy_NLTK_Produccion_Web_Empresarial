@@ -111,3 +111,28 @@ def test_integrate_old_contacts_preserves_status_and_is_idempotent(api):
     assert comments[0]['estado'] == 'resuelto'
     assert comments[0]['analisis'] == row['analisis']
     assert comments[0]['motivo_categoria'] == row['motivo_categoria']
+
+
+def test_startup_integrates_old_consultas_without_manual_command(api):
+    from fastapi.testclient import TestClient
+    from app.main import app
+    with connect() as db:
+        db.execute("INSERT INTO consultas_contacto(nombre, correo, asunto, estado, created_at) "
+                   "VALUES ('Anterior', 'old@example.com', 'Queja por demora', 'en_atencion', '2026-09-01 12:00:00+00')")
+    for _ in range(2):
+        with TestClient(app) as restarted:
+            restarted.headers.update(api.headers)
+            response = restarted.get('/api/contacto')
+            assert response.status_code == 200
+            row = response.json()[0]
+            assert row['categoria'] == 'reclamo'
+            assert row['analisis']['palabras_clave'] == ['demora', 'queja']
+            assert row['analisis']['total_tokens'] == 3
+            assert row['estado'] == 'en_atencion'
+    with connect() as db:
+        assert db.execute('SELECT count(*) AS n FROM comentarios').fetchone()['n'] == 1
+        assert db.execute('SELECT count(*) AS n FROM clientes').fetchone()['n'] == 1
+        assert db.execute('SELECT count(*) AS n FROM tiempos_atencion').fetchone()['n'] == 0
+        row = db.execute('SELECT fecha, estado FROM comentarios').fetchone()
+        assert str(row['fecha']) == '2026-09-01'
+        assert row['estado'] == 'en_atencion'

@@ -1,3 +1,6 @@
+from contextlib import asynccontextmanager
+from starlette.concurrency import run_in_threadpool
+from app.services.inicio import preparar_datos
 from fastapi import FastAPI, Query, Request, Depends
 from datetime import date, timedelta
 from app.database.connection import get_connection
@@ -24,7 +27,14 @@ from app.api.contacto import router as contacto_router
 from psycopg.types.json import Jsonb
 from app.services.nltk_service import palabras_frecuentes, clasificar_texto
 
+@asynccontextmanager
+async def lifespan(app):
+    await run_in_threadpool(preparar_datos)
+    yield
+
+
 app = FastAPI(
+    lifespan=lifespan,
     title="Empresa Inteligente - API",
     description="API empresarial con cálculo científico (SciPy) y procesamiento de lenguaje natural (NLTK)",
     version="1.0.0"
