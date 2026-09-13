@@ -1,45 +1,17 @@
-from datetime import date
-from typing import Annotated
 from fastapi import APIRouter, Depends
 from fastapi.responses import HTMLResponse
-from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 from app.database.connection import get_connection
-from app.services.nltk_service import clasificar_texto
-from app.services.auditoria_service import registrar
+from app.api.contacto import ConsultaNueva
+from app.services.contacto_service import registrar_contacto
 
 router = APIRouter(tags=["Landing"])
 
-Asunto = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=10000)]
-
-
-class ContactoLanding(BaseModel):
-    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
-    nombre: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=150)]
-    empresa: str = Field(default="", max_length=200)
-    correo: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=200)]
-    telefono: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=50)]
-    asunto: Asunto
-
 
 @router.post("/api/landing/contacto", status_code=201)
-def crear_contacto(data: ContactoLanding, db=Depends(get_connection)):
-    # Cada envío del formulario público crea un cliente nuevo: no es un usuario
-    # del sistema, es un lead que recién llega, así que no se busca duplicados.
-    cliente_id = db.execute(
-        "INSERT INTO clientes(nombre, empresa, correo, telefono) VALUES (%s, %s, %s, %s) RETURNING id",
-        (data.nombre, data.empresa, data.correo, data.telefono),
-    ).fetchone()["id"]
-
-    categoria, _ = clasificar_texto(data.asunto)
-    comment_id = db.execute(
-        "INSERT INTO comentarios(cliente_id, contenido, fecha, categoria, procesado) VALUES (%s, %s, %s, %s, TRUE) RETURNING id",
-        (cliente_id, data.asunto, date.today(), categoria),
-    ).fetchone()["id"]
-
-    registrar(db, "crear_contacto_landing", "comentarios", comment_id, {"categoria": categoria})
+def crear_contacto(data: ConsultaNueva, db=Depends(get_connection)):
+    result = registrar_contacto(db, data)
     db.commit()
-
-    return {"mensaje": "Gracias por contactarnos, en breve te responderemos."}
+    return result
 
 
 @router.get("/landing", response_class=HTMLResponse)
@@ -259,7 +231,7 @@ LANDING_HTML = """<!DOCTYPE html>
             <input type="text" name="telefono" required maxlength="50">
              </label>
             <label>Asunto
-              <textarea name="asunto" required maxlength="10000" placeholder="Contanos que necesitas..."></textarea>
+              <textarea name="asunto" required minlength="10" maxlength="5000" placeholder="Contanos que necesitas..."></textarea>
             </label>
             <button type="submit" id="btn-enviar">Enviar</button>
           </form>

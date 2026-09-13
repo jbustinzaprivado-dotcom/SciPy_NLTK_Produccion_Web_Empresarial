@@ -9,7 +9,7 @@ interface Comentario {
   id: string;
   cliente_nombre: string;
   fecha: string;
-  tiempo_atencion_minutos: number;
+  tiempo_atencion_minutos: number | null;
   comentario: string;
 }
 
@@ -17,7 +17,7 @@ interface Comentario {
 const MODULOS = [
   { to: '/metricas',     title: 'Metricas SciPy',  desc: 'Estadistica e Interpolacion — Ejercicios 1 y 3' },
   { to: '/optimizacion', title: 'Optimizacion',     desc: 'Minimizacion de costos — Ejercicio 2' },
-  { to: '/comentarios',  title: 'Comentarios',      desc: 'Keywords NLTK — Ejercicio 4' },
+  { to: '/consultas', title: 'Consultas web', desc: 'Mensajes y seguimiento de clientes' },
   { to: '/analisis-nlp', title: 'Analisis NLP',     desc: 'Clasificacion y Busqueda — Ejercicios 5 y 6' },
   { to: '/clientes',     title: 'Clientes',         desc: 'Directorio y tiempos de atencion' },
   { to: '/reportes',     title: 'Reportes',         desc: 'Informe ejecutivo consolidado' },
@@ -188,7 +188,7 @@ export default function Dashboard() {
                     <tr key={c.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
                       <td style={td}><strong>{c.cliente_nombre}</strong></td>
                       <td style={{ ...td, color: '#52676b' }}>{c.fecha}</td>
-                      <td style={td}>{c.tiempo_atencion_minutos} min</td>
+                      <td style={td}>{c.tiempo_atencion_minutos == null ? 'Sin tiempo registrado' : `${c.tiempo_atencion_minutos} min`}</td>
                       <td style={{ ...td, color: '#334155' }}>{c.comentario}</td>
                     </tr>
                   ))}

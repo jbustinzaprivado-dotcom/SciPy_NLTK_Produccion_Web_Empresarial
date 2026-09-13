@@ -1,3 +1,4 @@
+import ClasificacionMensaje, { type AnalisisMensaje } from '../components/ClasificacionMensaje';
 import React, { useEffect, useState } from 'react';
 import { requestJson } from '../services/http';
 
@@ -7,6 +8,8 @@ interface Solicitud {
   fecha: string;
   comentario: string;
   categoria: string | null;
+  motivo_categoria?: string;
+  analisis?: AnalisisMensaje | null;
   estado: string;
 }
 
@@ -69,6 +72,7 @@ export default function Solicitudes() {
               </div>
               <button type="button" onClick={() => resolver(s.id)} style={btnDark}>Marcar como resuelto</button>
             </div>
+            <ClasificacionMensaje categoria={s.categoria} motivo={s.motivo_categoria} analisis={s.analisis} />
           </div>
         ))}
       </div>

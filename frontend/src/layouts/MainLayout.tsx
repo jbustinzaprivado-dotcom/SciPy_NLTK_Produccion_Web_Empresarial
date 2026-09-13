@@ -20,7 +20,6 @@ const grupos: NavGroup[] = [
     { to: '/consultas', label: 'Consultas web', icon: 'mail' },
     { to: '/landing#contacto', label: 'Contáctenos', icon: 'arrow' },
     { to: '/solicitudes', label: 'Solicitudes', icon: 'message' },
-    { to: '/comentarios', label: 'Comentarios', icon: 'message' },
     { to: '/tiempos-atencion', label: 'Tiempos de atención', icon: 'clock' },
   ]},
   { titulo: 'Inteligencia NLP', items: [

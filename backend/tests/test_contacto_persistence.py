@@ -39,3 +39,75 @@ def test_landing_to_inbox_and_status_persist(api):
     assert api.patch('/api/contacto/999999', json={'estado': 'atendida'}).status_code == 404
     assert api.get('/api/contacto?limit=1&offset=1').json() == []
     assert api.get('/api/contacto?limit=101').status_code == 422
+
+
+import pytest
+
+
+@pytest.mark.parametrize('endpoint', ['/api/contacto', '/api/landing/contacto'])
+def test_public_contact_reaches_panel_and_nlp(api, endpoint):
+    payload = {'nombre': 'Visitante', 'correo': 'visitante@example.com',
+               'asunto': 'Quiero comprar licencias para mi empresa.'}
+    response = api.post(endpoint, json=payload)
+    assert response.status_code == 201, response.text
+    consulta = api.get('/api/contacto').json()[0]
+    assert consulta['categoria'] == 'ventas'
+    assert 'licencias' in consulta['analisis']['palabras_clave']
+    assert consulta['analisis']['total_tokens'] > 0
+    comentario = api.get('/api/comentarios?estado=pendiente').json()[0]
+    assert comentario['id'] == consulta['comentario_id']
+    assert comentario['comentario'] == payload['asunto']
+    assert comentario['procesado'] is True
+    assert comentario['tiempo_atencion_minutos'] is None
+    report = api.get('/api/reportes').json()
+    assert report['atencion']['total_comentarios'] == 1
+    assert report['atencion']['total_atenciones_registradas'] == 0
+    assert report['nlp']['total_procesados'] == 1
+    for estado, esperado in [('en_atencion', 'en_atencion'), ('atendida', 'resuelto'), ('pendiente', 'pendiente')]:
+        assert api.patch(f"/api/contacto/{consulta['id']}", json={'estado': estado}).status_code == 200
+        assert api.get('/api/comentarios').json()[0]['estado'] == esperado
+    assert api.patch(f"/api/comentarios/{comentario['id']}/estado?nuevo_estado=resuelto").status_code == 200
+    assert api.get('/api/contacto').json()[0]['estado'] == 'atendida'
+    assert api.patch(f"/api/comentarios/{comentario['id']}/estado?nuevo_estado=incorrecto").status_code == 422
+
+
+def test_contact_transaction_rolls_back_all_records(api):
+    with connect() as db:
+        db.execute("ALTER TABLE consultas_contacto ADD CONSTRAINT test_reject CHECK (nombre <> 'Rechazar')")
+    response = api.post('/api/contacto', json={'nombre': 'Rechazar', 'correo': 'prueba@example.com',
+                                             'asunto': 'Necesito comprar una licencia.'})
+    assert response.status_code == 503
+    with connect() as db:
+        for table in ['clientes', 'comentarios', 'consultas_contacto', 'auditoria']:
+            assert db.execute(f'SELECT count(*) AS n FROM {table}').fetchone()['n'] == 0
+
+
+def test_missing_nltk_resources_does_not_save_partial_contact(api, monkeypatch):
+    def unavailable(_):
+        raise LookupError('missing corpus')
+    monkeypatch.setattr('app.services.contacto_service.analizar_texto', unavailable)
+    response = api.post('/api/contacto', json={'nombre': 'Visitante', 'correo': 'prueba@example.com',
+                                             'asunto': 'Necesito comprar una licencia.'})
+    assert response.status_code == 503
+    assert api.get('/api/contacto').json() == []
+    assert api.get('/api/comentarios').json() == []
+    assert api.get('/api/clientes').json() == []
+
+
+def test_integrate_old_contacts_preserves_status_and_is_idempotent(api):
+    from app.services.integrar_consultas import integrar_consultas
+    with connect() as db:
+        db.execute("INSERT INTO consultas_contacto(nombre, correo, asunto, estado) VALUES ('Anterior', 'old@example.com', 'Mal servicio y demora', 'atendida')")
+        assert integrar_consultas(db) == 1
+    with connect() as db:
+        assert integrar_consultas(db) == 0
+    row = api.get('/api/contacto').json()[0]
+    assert row['categoria'] == 'reclamo'
+    assert 'demora' in row['motivo_categoria']
+    assert row['analisis']['total_tokens'] > 0
+    assert row['estado'] == 'atendida'
+    comments = api.get('/api/comentarios').json()
+    assert len(comments) == 1
+    assert comments[0]['estado'] == 'resuelto'
+    assert comments[0]['analisis'] == row['analisis']
+    assert comments[0]['motivo_categoria'] == row['motivo_categoria']

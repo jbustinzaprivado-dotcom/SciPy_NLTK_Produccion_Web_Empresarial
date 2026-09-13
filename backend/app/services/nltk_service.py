@@ -34,3 +34,13 @@ def palabras_frecuentes(textos: list[str], top: int = 7) -> list[dict]:
     limpios = [t for t in tokens if t.isalpha() and t not in stop]
     frecuentes = Counter(limpios).most_common(top)
     return [{"palabra": pal, "frecuencia": frec} for pal, frec in frecuentes]
+
+def explicar_categoria(texto: str, categoria: str | None) -> str:
+    actual, _ = clasificar_texto(texto)
+    if categoria != actual:
+        return 'Categoría guardada en el registro; no se dispone del motivo original.'
+    reglas = PALABRAS_RECLAMO if actual == 'reclamo' else PALABRAS_VENTAS if actual == 'ventas' else []
+    coincidencias = [p for p in reglas if p in texto.lower()]
+    if coincidencias:
+        return 'Coincidencias en el asunto: ' + ', '.join(coincidencias) + '. Las reglas de reclamo tienen prioridad sobre ventas.'
+    return 'Soporte por defecto: el asunto no coincide con las reglas de reclamo ni de ventas.'
