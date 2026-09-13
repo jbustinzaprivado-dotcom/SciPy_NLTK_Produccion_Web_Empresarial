@@ -17,6 +17,8 @@ import HistorialCliente  from '../pages/HistorialCliente';
 import ReporteAtencion     from '../pages/ReporteAtencion';
 import ReporteNLP          from '../pages/ReporteNLP';
 import ReporteEstadisticas from '../pages/ReporteEstadisticas';
+import Landing from '../pages/Landing';
+import Consultas from '../pages/Consultas';
 import Login        from '../pages/Login';
 import Register     from '../pages/Register';
 import { getToken }  from '../services/http';
@@ -32,10 +34,14 @@ function RutaProtegida({ children }: { children: React.ReactElement }) {
 export default function AppRoutes() {
   return (
     <Routes>
+      <Route path="/landing" element={<Landing />} />
+      <Route path="/contactenos" element={<Navigate to="/landing#contacto" replace />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route element={<RutaProtegida><MainLayout /></RutaProtegida>}>
         <Route index element={<Navigate to="/dashboard" replace />} />
+        <Route path="/consultas" element={<Consultas />} />
+        <Route path="/reportes" element={<Navigate to="/reportes/estadisticas" replace />} />
         <Route path="/dashboard"    element={<Dashboard />}    />
         <Route path="/metricas"     element={<Metricas />}     />
         <Route path="/optimizacion" element={<Optimizacion />} />

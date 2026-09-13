@@ -80,7 +80,7 @@ export default function Comentarios() {
           <h2 style={h2}>Comentarios de Clientes</h2>
           <p style={sub}>Ejercicio 4: analisis de frecuencia con NLTK · Reto Final: registro y filtrado por fecha</p>
         </div>
-        <span style={{ fontSize: '0.78rem', padding: '0.3rem 0.7rem', borderRadius: '4px', border: '1px solid #e2e8f0', backgroundColor: online ? '#f0fdf4' : '#f8fafc', color: online ? '#166534' : '#475569' }}>
+        <span style={{ fontSize: '0.78rem', padding: '0.3rem 0.7rem', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: online ? '#f0fdf4' : '#f8fafc', color: online ? '#166534' : '#475569' }}>
           {online === null ? 'Conectando...' : online ? 'Backend Activo' : 'Demostracion'}
         </span>
       </header>
@@ -94,12 +94,12 @@ export default function Comentarios() {
           <code style={badge}>Counter.most_common(10)</code>
         </div>
         <div style={card}>
-          <p style={{ margin: '0 0 0.75rem', fontSize: '0.82rem', color: '#64748b' }}>
+          <p style={{ margin: '0 0 0.75rem', fontSize: '0.82rem', color: '#52676b' }}>
             Flujo: tokenizar → eliminar stopwords en español → contar frecuencias con <code>collections.Counter</code>.
           </p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
             {keywords.map((k, i) => (
-              <span key={k.palabra} style={{ backgroundColor: i < 3 ? '#0f172a' : '#f1f5f9', color: i < 3 ? '#ffffff' : '#334155', border: '1px solid #e2e8f0', padding: '0.3rem 0.75rem', borderRadius: '4px', fontSize: '0.82rem' }}>
+              <span key={k.palabra} style={{ backgroundColor: i < 3 ? '#0f172a' : '#f1f5f9', color: i < 3 ? '#ffffff' : '#334155', border: '1px solid #e2e8f0', padding: '0.3rem 0.75rem', borderRadius: '8px', fontSize: '0.82rem' }}>
                 {k.palabra} <strong>({k.frecuencia})</strong>
               </span>
             ))}
@@ -124,7 +124,7 @@ export default function Comentarios() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
             <h3 style={sH3}>Historial</h3>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <label style={{ fontSize: '0.78rem', color: '#64748b' }}>Filtrar fecha:</label>
+              <label style={{ fontSize: '0.78rem', color: '#52676b' }}>Filtrar fecha:</label>
               <input type="date" value={fechaFiltro} onChange={(e) => setFechaFiltro(e.target.value)} style={{ ...input, width: 'auto', padding: '0.25rem 0.4rem' }} />
               {fechaFiltro && <button onClick={() => setFechaFiltro('')} style={{ background: 'none', border: 'none', color: '#0284c7', fontSize: '0.78rem', cursor: 'pointer' }}>Limpiar</button>}
             </div>
@@ -134,7 +134,7 @@ export default function Comentarios() {
               <div key={c.id} style={{ borderBottom: '1px solid #f1f5f9', padding: '0.65rem 0' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem' }}>
                   <strong style={{ color: '#0f172a' }}>{c.cliente_nombre}</strong>
-                  <span style={{ color: '#64748b' }}>{c.fecha} · {c.tiempo_atencion_minutos} min</span>
+                  <span style={{ color: '#52676b' }}>{c.fecha} · {c.tiempo_atencion_minutos} min</span>
                 </div>
                 <p style={{ margin: '0.2rem 0 0', fontSize: '0.82rem', color: '#334155' }}>{c.comentario}</p>
               </div>
@@ -146,11 +146,11 @@ export default function Comentarios() {
   );
 }
 
-const card: React.CSSProperties      = { backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '1rem 1.25rem', boxSizing: 'border-box' };
+const card: React.CSSProperties      = { backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '1rem 1.25rem', boxSizing: 'border-box' };
 const pageHeader: React.CSSProperties = { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '1rem' };
 const h2: React.CSSProperties        = { margin: 0, fontSize: '1.5rem', fontWeight: 700, color: '#0f172a' };
-const sub: React.CSSProperties       = { margin: '0.2rem 0 0', fontSize: '0.85rem', color: '#64748b' };
+const sub: React.CSSProperties       = { margin: '0.2rem 0 0', fontSize: '0.85rem', color: '#52676b' };
 const sH3: React.CSSProperties       = { fontSize: '0.95rem', fontWeight: 600, color: '#1e293b', margin: 0 };
-const badge: React.CSSProperties     = { fontSize: '0.7rem', color: '#64748b', fontFamily: 'monospace', backgroundColor: '#f1f5f9', padding: '0.2rem 0.5rem', borderRadius: '4px' };
-const input: React.CSSProperties     = { padding: '0.45rem 0.6rem', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '0.85rem', width: '100%', boxSizing: 'border-box' };
-const btnDark: React.CSSProperties   = { backgroundColor: '#0f172a', color: '#fff', border: 'none', padding: '0.55rem', borderRadius: '4px', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' };
+const badge: React.CSSProperties     = { fontSize: '0.7rem', color: '#52676b', fontFamily: 'monospace', backgroundColor: '#f1f5f9', padding: '0.2rem 0.5rem', borderRadius: '8px' };
+const input: React.CSSProperties     = { padding: '0.45rem 0.6rem', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.85rem', width: '100%', boxSizing: 'border-box' };
+const btnDark: React.CSSProperties   = { backgroundColor: '#0f172a', color: '#fff', border: 'none', padding: '0.55rem', borderRadius: '8px', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' };

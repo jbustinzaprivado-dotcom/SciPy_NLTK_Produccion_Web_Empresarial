@@ -83,10 +83,10 @@ export default function AnalizarComentario() {
           <span style={miniLabel}>Palabras clave detectadas</span>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.4rem' }}>
             {analisis.palabras_clave.length === 0 ? (
-              <span style={{ fontSize: '0.8rem', color: '#64748b' }}>No se detectaron palabras clave relevantes.</span>
+              <span style={{ fontSize: '0.8rem', color: '#52676b' }}>No se detectaron palabras clave relevantes.</span>
             ) : (
               analisis.palabras_clave.map((p) => (
-                <span key={p} style={{ backgroundColor: '#f1f5f9', color: '#334155', border: '1px solid #e2e8f0', padding: '0.3rem 0.75rem', borderRadius: '4px', fontSize: '0.82rem' }}>{p}</span>
+                <span key={p} style={{ backgroundColor: '#f1f5f9', color: '#334155', border: '1px solid #e2e8f0', padding: '0.3rem 0.75rem', borderRadius: '8px', fontSize: '0.82rem' }}>{p}</span>
               ))
             )}
           </div>
@@ -96,11 +96,11 @@ export default function AnalizarComentario() {
   );
 }
 
-const card: React.CSSProperties      = { backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '1rem 1.25rem', boxSizing: 'border-box' };
+const card: React.CSSProperties      = { backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '1rem 1.25rem', boxSizing: 'border-box' };
 const pageHeader: React.CSSProperties = { borderBottom: '1px solid #e2e8f0', paddingBottom: '1rem' };
 const h2: React.CSSProperties        = { margin: 0, fontSize: '1.5rem', fontWeight: 700, color: '#0f172a' };
-const sub: React.CSSProperties       = { margin: '0.2rem 0 0', fontSize: '0.85rem', color: '#64748b' };
+const sub: React.CSSProperties       = { margin: '0.2rem 0 0', fontSize: '0.85rem', color: '#52676b' };
 const cardLabel: React.CSSProperties = { margin: '0 0 0.6rem 0', fontSize: '0.85rem', fontWeight: 600, color: '#1e293b' };
 const labelSt: React.CSSProperties   = { display: 'flex', flexDirection: 'column', fontSize: '0.82rem', fontWeight: 600, color: '#475569' };
-const input: React.CSSProperties     = { padding: '0.45rem 0.6rem', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '0.85rem', width: '100%', maxWidth: '420px', boxSizing: 'border-box' };
-const miniLabel: React.CSSProperties = { display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.04em' };
+const input: React.CSSProperties     = { padding: '0.45rem 0.6rem', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.85rem', width: '100%', maxWidth: '420px', boxSizing: 'border-box' };
+const miniLabel: React.CSSProperties = { display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#52676b', textTransform: 'uppercase', letterSpacing: '0.04em' };

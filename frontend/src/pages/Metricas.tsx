@@ -69,7 +69,7 @@ export default function Metricas() {
 function StatCard({ label, value, code }: { label: string; value: string; code?: string }) {
   return (
     <div style={card}>
-      <span style={{ fontSize: '0.78rem', color: '#64748b', display: 'block' }}>{label}</span>
+      <span style={{ fontSize: '0.78rem', color: '#52676b', display: 'block' }}>{label}</span>
       <span style={{ fontSize: '1.4rem', fontWeight: 700, color: '#0f172a', display: 'block', margin: '0.2rem 0' }}>{value}</span>
       {code && <code style={{ fontSize: '0.7rem', color: '#0284c7', fontFamily: 'monospace' }}>{code}</code>}
     </div>
@@ -77,21 +77,21 @@ function StatCard({ label, value, code }: { label: string; value: string; code?:
 }
 
 function StatusBadge({ online }: { online: boolean | null }) {
-  return <span style={{ fontSize: '0.78rem', padding: '0.3rem 0.7rem', borderRadius: '4px', border: '1px solid #e2e8f0', backgroundColor: online ? '#f0fdf4' : '#f8fafc', color: online ? '#166534' : '#475569' }}>{online === null ? 'Conectando...' : online ? 'Backend Activo' : 'Sin datos disponibles'}</span>;
+  return <span style={{ fontSize: '0.78rem', padding: '0.3rem 0.7rem', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: online ? '#f0fdf4' : '#f8fafc', color: online ? '#166534' : '#475569' }}>{online === null ? 'Conectando...' : online ? 'Backend Activo' : 'Sin datos disponibles'}</span>;
 }
 
 function SectionTitle({ title, badge }: { title: string; badge: string }) {
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
       <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#1e293b', margin: 0 }}>{title}</h3>
-      <code style={{ fontSize: '0.7rem', color: '#64748b', fontFamily: 'monospace', backgroundColor: '#f1f5f9', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>{badge}</code>
+      <code style={{ fontSize: '0.7rem', color: '#52676b', fontFamily: 'monospace', backgroundColor: '#f1f5f9', padding: '0.2rem 0.5rem', borderRadius: '8px' }}>{badge}</code>
     </div>
   );
 }
 
-const card: React.CSSProperties = { backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '1rem', boxSizing: 'border-box' };
+const card: React.CSSProperties = { backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '1rem', boxSizing: 'border-box' };
 const grid4: React.CSSProperties = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' };
 const pageHeader: React.CSSProperties = { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '1rem' };
 const h2: React.CSSProperties = { margin: 0, fontSize: '1.5rem', fontWeight: 700, color: '#0f172a' };
-const sub: React.CSSProperties = { margin: '0.2rem 0 0', fontSize: '0.85rem', color: '#64748b' };
-const desc: React.CSSProperties = { fontSize: '0.82rem', color: '#64748b', margin: '0 0 0.75rem' };
+const sub: React.CSSProperties = { margin: '0.2rem 0 0', fontSize: '0.85rem', color: '#52676b' };
+const desc: React.CSSProperties = { fontSize: '0.82rem', color: '#52676b', margin: '0 0 0.75rem' };

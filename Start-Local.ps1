@@ -1,3 +1,4 @@
+param([switch]$RestartApi)
 $ErrorActionPreference = 'Stop'
 $projectRoot = $PSScriptRoot
 $localDirectory = Join-Path $projectRoot '.local'
@@ -14,6 +15,13 @@ if (!(Test-Path $configPath)) {
     @{ password = [Convert]::ToBase64String($passwordBytes) } | ConvertTo-Json | Set-Content -LiteralPath $configPath
 }
 $localConfig = Get-Content -LiteralPath $configPath -Raw | ConvertFrom-Json
+if (!$localConfig.PSObject.Properties['secret_key']) {
+    $secretBytes = New-Object byte[] 48
+    [System.Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($secretBytes)
+    $localConfig | Add-Member -NotePropertyName secret_key -NotePropertyValue ([Convert]::ToBase64String($secretBytes))
+    $localConfig | ConvertTo-Json | Set-Content -LiteralPath $configPath
+}
+$env:SECRET_KEY = $localConfig.secret_key
 $env:PGHOST = '127.0.0.1'
 $env:PGPORT = '55440'
 $env:PGUSER = 'empresa_local'
@@ -42,12 +50,25 @@ try {
     & $pythonExe -m app.database.migrate
     if ($LASTEXITCODE -ne 0) { throw 'Fallaron las migraciones.' }
     $listener = Get-NetTCPConnection -State Listen -LocalPort 8000 -ErrorAction SilentlyContinue
+    if ($listener -and $RestartApi) {
+        foreach ($apiProcessId in ($listener.OwningProcess | Select-Object -Unique)) {
+            $apiProcess = Get-CimInstance Win32_Process -Filter "ProcessId = $apiProcessId"
+            $apiParent = Get-CimInstance Win32_Process -Filter "ProcessId = $($apiProcess.ParentProcessId)"
+            $belongsToProject = ($apiProcess.ExecutablePath -eq $pythonExe) -or ($apiParent.ExecutablePath -eq $pythonExe -and $apiParent.CommandLine -match 'uvicorn\s+app\.main:app')
+            if ($apiProcess.CommandLine -notmatch 'uvicorn\s+app\.main:app' -or !$belongsToProject) {
+                throw 'El puerto 8000 pertenece a otro proceso; no se reiniciará.'
+            }
+            Stop-Process -Id $apiProcessId
+            Wait-Process -Id $apiProcessId -Timeout 10 -ErrorAction SilentlyContinue
+        }
+        $listener = $null
+    }
     if (!$listener) {
         Start-Process -FilePath $pythonExe -ArgumentList '-m','uvicorn','app.main:app','--host','127.0.0.1','--port','8000' -WorkingDirectory (Get-Location).Path -WindowStyle Hidden -RedirectStandardOutput (Join-Path $localDirectory 'api.log') -RedirectStandardError (Join-Path $localDirectory 'api-error.log') | Out-Null
     }
     $ready = $false
     for ($attempt = 0; $attempt -lt 15; $attempt++) {
-        try { Invoke-RestMethod 'http://127.0.0.1:8000/api/clientes' -TimeoutSec 2 | Out-Null; $ready = $true; break }
+        try { Invoke-RestMethod 'http://127.0.0.1:8000/openapi.json' -TimeoutSec 2 | Out-Null; $ready = $true; break }
         catch { Start-Sleep -Seconds 1 }
     }
     if (!$ready) { throw 'La API no está lista. Revisa .local/api-error.log.' }

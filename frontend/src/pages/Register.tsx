@@ -101,15 +101,16 @@ export default function Register() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#eef2f8' }}>
-      <div className="panel" style={{ padding: 32, width: 380 }}>
-        <h1 style={{ margin: '0 0 4px', font: '700 22px "Space Grotesk"', color: '#172033' }}>Registro Facial</h1>
-        <p style={{ margin: '0 0 20px', color: '#8390a3', fontSize: 13 }}>Crea tu cuenta vinculada a tu rostro</p>
+    <div className="auth-shell theme-eucalyptus">
+      <div className="panel auth-card">
+        <Link to="/landing" className="auth-brand"><span className="brand-mark">CI</span><span>Centro IA<small>Atención empresarial</small></span></Link>
+        <h1 style={{ margin: '0 0 4px', font: '700 22px "Space Grotesk"', color: '#172033' }}>Crea tu cuenta</h1>
+        <p style={{ margin: '0 0 20px', color: '#52676b', fontSize: 13 }}>Crea tu cuenta vinculada a tu rostro</p>
 
         <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <input className="field" type="text" placeholder="Nombre completo" value={nombre} onChange={e => setNombre(e.target.value)} required />
-          <input className="field" type="email" placeholder="Correo electrónico" value={email} onChange={e => setEmail(e.target.value)} required />
-          <input className="field" type="password" placeholder="Contraseña" value={password} onChange={e => setPassword(e.target.value)} required />
+          <input className="field" type="text" placeholder="Nombre completo" aria-label="Nombre completo" autoComplete="name" value={nombre} onChange={e => setNombre(e.target.value)} required />
+          <input className="field" type="email" placeholder="Correo electrónico" aria-label="Correo electrónico" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} required />
+          <input className="field" type="password" placeholder="Contraseña" aria-label="Contraseña" autoComplete="new-password" value={password} onChange={e => setPassword(e.target.value)} required />
 
           {/* Seccion de Camara */}
           <div style={{ background: '#000', borderRadius: 8, overflow: 'hidden', minHeight: 160, display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
@@ -137,7 +138,7 @@ export default function Register() {
           )}
 
           {capturedImage && (
-            <button type="button" onClick={startCamera} style={{ background: 'transparent', border: 'none', color: '#2563eb', fontSize: 12, cursor: 'pointer' }}>
+            <button type="button" onClick={startCamera} style={{ background: 'transparent', border: 'none', color: '#193d4a', fontSize: 12, cursor: 'pointer' }}>
               Volver a tomar foto
             </button>
           )}
@@ -148,7 +149,7 @@ export default function Register() {
             {cargando ? 'Registrando...' : 'Completar Registro'}
           </button>
 
-          <Link to="/login" style={{ textAlign: 'center', color: '#64748b', fontSize: 12, textDecoration: 'none', marginTop: 8 }}>
+          <Link to="/login" style={{ textAlign: 'center', color: '#52676b', fontSize: 12, textDecoration: 'none', marginTop: 8 }}>
             ¿Ya tienes cuenta? Inicia sesión
           </Link>
         </form>

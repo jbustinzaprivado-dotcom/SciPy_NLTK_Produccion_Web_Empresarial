@@ -111,25 +111,26 @@ export default function Login() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#eef2f8' }}>
-      <div className="panel" style={{ padding: 32, width: 360 }}>
-        <h1 style={{ margin: '0 0 4px', font: '700 22px "Space Grotesk"', color: '#172033' }}>Centro Inteligente</h1>
-        <p style={{ margin: '0 0 20px', color: '#8390a3', fontSize: 13 }}>
-          {isFaceMode ? 'Acceso con tu rostro' : 'Iniciá sesión para continuar'}
+    <div className="auth-shell theme-eucalyptus">
+      <div className="panel auth-card">
+        <Link to="/landing" className="auth-brand"><span className="brand-mark">CI</span><span>Centro IA<small>Atención empresarial</small></span></Link>
+        <h1 style={{ margin: '0 0 4px', font: '700 22px "Space Grotesk"', color: '#172033' }}>Bienvenido de nuevo</h1>
+        <p style={{ margin: '0 0 20px', color: '#52676b', fontSize: 13 }}>
+          {isFaceMode ? 'Acceso con tu rostro' : 'Ingresa a tu espacio de trabajo'}
         </p>
 
         {!isFaceMode ? (
           <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <input className="field" type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required />
-            <input className="field" type="password" placeholder="Contraseña" value={password} onChange={e => setPassword(e.target.value)} required />
+            <input className="field" type="email" placeholder="Correo electrónico" aria-label="Correo electrónico" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} required />
+            <input className="field" type="password" placeholder="Contraseña" aria-label="Contraseña" autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} required />
             {error && <p style={{ color: '#c0392b', fontSize: 12, margin: 0 }}>{error}</p>}
             <button className="primary-btn" type="submit" disabled={cargando}>
               {cargando ? 'Ingresando...' : 'Ingresar'}
             </button>
-            <button type="button" onClick={() => { setIsFaceMode(true); setError(null); }} style={{ background: 'transparent', border: 'none', color: '#2563eb', fontSize: 12, cursor: 'pointer', marginTop: 4 }}>
+            <button type="button" onClick={() => { setIsFaceMode(true); setError(null); }} style={{ background: 'transparent', border: 'none', color: '#193d4a', fontSize: 12, cursor: 'pointer', marginTop: 4 }}>
               Iniciar sesión con Reconocimiento Facial
             </button>
-            <Link to="/register" style={{ textAlign: 'center', color: '#64748b', fontSize: 12, textDecoration: 'none' }}>
+            <Link to="/register" style={{ textAlign: 'center', color: '#52676b', fontSize: 12, textDecoration: 'none' }}>
               ¿No tienes cuenta? Regístrate aquí
             </Link>
           </form>
@@ -138,7 +139,7 @@ export default function Login() {
             <input
               className="field"
               type="email"
-              placeholder="Email"
+              placeholder="Correo electrónico" aria-label="Correo electrónico" autoComplete="email"
               value={faceEmail}
               onChange={e => setFaceEmail(e.target.value)}
               required
@@ -171,7 +172,7 @@ export default function Login() {
               </button>
             )}
 
-            <button type="button" onClick={() => { stopCamera(); setIsFaceMode(false); setError(null); }} style={{ background: 'transparent', border: 'none', color: '#64748b', fontSize: 12, cursor: 'pointer', marginTop: 4 }}>
+            <button type="button" onClick={() => { stopCamera(); setIsFaceMode(false); setError(null); }} style={{ background: 'transparent', border: 'none', color: '#52676b', fontSize: 12, cursor: 'pointer', marginTop: 4 }}>
               Volver al login normal
             </button>
           </div>

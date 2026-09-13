@@ -42,7 +42,7 @@ export default function Auditoria() {
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
             <thead>
-              <tr style={{ borderBottom: '2px solid #e2e8f0', color: '#64748b', textAlign: 'left' }}>
+              <tr style={{ borderBottom: '2px solid #e2e8f0', color: '#52676b', textAlign: 'left' }}>
                 <th style={th}>Fecha</th>
                 <th style={th}>Acción</th>
                 <th style={th}>Tabla</th>
@@ -53,11 +53,11 @@ export default function Auditoria() {
             <tbody>
               {registros.map((r) => (
                 <tr key={r.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                  <td style={{ ...td, color: '#64748b', whiteSpace: 'nowrap' }}>{new Date(r.created_at).toLocaleString('es-PE')}</td>
+                  <td style={{ ...td, color: '#52676b', whiteSpace: 'nowrap' }}>{new Date(r.created_at).toLocaleString('es-PE')}</td>
                   <td style={td}><strong style={{ color: '#0f172a' }}>{r.accion}</strong></td>
                   <td style={{ ...td, color: '#475569' }}>{r.tabla ?? '—'}</td>
                   <td style={{ ...td, color: '#475569' }}>{r.registro_id ?? '—'}</td>
-                  <td style={{ ...td, color: '#64748b', fontFamily: 'monospace', fontSize: '0.75rem' }}>
+                  <td style={{ ...td, color: '#52676b', fontFamily: 'monospace', fontSize: '0.75rem' }}>
                     {r.detalles ? JSON.stringify(r.detalles) : '—'}
                   </td>
                 </tr>
@@ -70,9 +70,9 @@ export default function Auditoria() {
   );
 }
 
-const card: React.CSSProperties      = { backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '1rem 1.25rem', boxSizing: 'border-box' };
+const card: React.CSSProperties      = { backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '1rem 1.25rem', boxSizing: 'border-box' };
 const pageHeader: React.CSSProperties = { borderBottom: '1px solid #e2e8f0', paddingBottom: '1rem' };
 const h2: React.CSSProperties        = { margin: 0, fontSize: '1.5rem', fontWeight: 700, color: '#0f172a' };
-const sub: React.CSSProperties       = { margin: '0.2rem 0 0', fontSize: '0.85rem', color: '#64748b' };
+const sub: React.CSSProperties       = { margin: '0.2rem 0 0', fontSize: '0.85rem', color: '#52676b' };
 const th: React.CSSProperties        = { padding: '0.5rem 0.6rem', fontWeight: 600 };
 const td: React.CSSProperties        = { padding: '0.5rem 0.6rem' };
