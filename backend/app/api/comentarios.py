@@ -2,7 +2,7 @@ from datetime import date
 from fastapi import APIRouter, Depends, HTTPException
 from app.database.connection import get_connection
 from app.database.models import ComentarioNuevo
-from app.services.nltk_service import clasificar_texto
+from app.services.nltk_service import clasificar_texto, explicar_categoria
 from app.services.auditoria_service import registrar
 from app.api.deps import requerir_usuario
 
@@ -10,19 +10,21 @@ router = APIRouter(prefix="/api/comentarios", tags=["Comentarios"], dependencies
 SELECT_COMENTARIOS = """
 SELECT c.id::text, c.cliente_id, cl.nombre AS cliente_nombre, c.fecha,
        c.contenido AS comentario, c.estado, c.categoria, c.procesado,
-       t.tiempo_minutos::float8 AS tiempo_atencion_minutos
+       t.tiempo_minutos::float8 AS tiempo_atencion_minutos, q.analisis
 FROM comentarios c JOIN clientes cl ON cl.id = c.cliente_id
 LEFT JOIN tiempos_atencion t ON t.comentario_id = c.id
+LEFT JOIN consultas_contacto q ON q.comentario_id = c.id
 """
 
 
 @router.get("")
 def listar_comentarios(fecha: date | None = None, cliente_id: int | None = None, estado: str | None = None, db=Depends(get_connection)):
-    return db.execute(
+    rows = db.execute(
         SELECT_COMENTARIOS + " WHERE (%s::date IS NULL OR c.fecha = %s) AND (%s::bigint IS NULL OR c.cliente_id = %s) "
         "AND (%s::text IS NULL OR c.estado = %s) ORDER BY c.fecha DESC, c.id DESC",
         (fecha, fecha, cliente_id, cliente_id, estado, estado),
     ).fetchall()
+    return [{**row, "motivo_categoria": explicar_categoria(row["comentario"], row["categoria"])} for row in rows]
 
 @router.post("", status_code=201)
 def crear_comentario(data: ComentarioNuevo, db=Depends(get_connection)):
@@ -48,6 +50,8 @@ def crear_comentario(data: ComentarioNuevo, db=Depends(get_connection)):
     return result
 @router.patch("/{comentario_id}/estado")
 def cambiar_estado_comentario(comentario_id: int, nuevo_estado: str, db=Depends(get_connection)):
+    if nuevo_estado not in ('pendiente', 'en_atencion', 'resuelto'):
+        raise HTTPException(422, "Estado no válido")
     # Usada por el modulo de Solicitudes para marcar una solicitud como resuelta
     result = db.execute(
         "UPDATE comentarios SET estado = %s WHERE id = %s RETURNING id::text, estado",
@@ -55,6 +59,8 @@ def cambiar_estado_comentario(comentario_id: int, nuevo_estado: str, db=Depends(
     ).fetchone()
     if not result:
         raise HTTPException(404, "Comentario no encontrado")
+    db.execute("UPDATE consultas_contacto SET estado = %s WHERE comentario_id = %s",
+               ('atendida' if nuevo_estado == 'resuelto' else nuevo_estado, comentario_id))
     registrar(db, "cambiar_estado_comentario", "comentarios", comentario_id, {"estado": nuevo_estado})
     db.commit()
     return result

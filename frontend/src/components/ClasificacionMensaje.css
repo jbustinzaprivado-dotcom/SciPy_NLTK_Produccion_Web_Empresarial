@@ -1,0 +1,8 @@
+.message-analysis { margin-top: 18px; padding: 18px; border: 1px solid currentColor; border-radius: 14px; background: rgba(111, 144, 152, .10); overflow-wrap: anywhere; }
+.message-analysis-heading { display: flex; gap: 32px; flex-wrap: wrap; align-items: start; }
+.message-analysis-heading strong { display: block; font-size: 1.15rem; }
+.message-category { text-transform: capitalize; }
+.message-analysis-label { display: block; font-size: .75rem; font-weight: 600; margin-bottom: 7px; }
+.message-analysis p { line-height: 1.65; margin: 14px 0; }
+.message-keywords { display: flex; flex-wrap: wrap; gap: 8px; }
+.message-keywords span { padding: 6px 11px; border: 1px solid currentColor; border-radius: 8px; font-size: .85rem; }

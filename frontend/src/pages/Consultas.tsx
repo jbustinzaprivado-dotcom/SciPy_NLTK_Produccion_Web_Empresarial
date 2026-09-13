@@ -1,3 +1,4 @@
+import ClasificacionMensaje from '../components/ClasificacionMensaje';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { requestJson } from '../services/http';
@@ -5,6 +6,8 @@ import { requestJson } from '../services/http';
 interface Consulta {
   id: string; nombre: string; empresa: string; correo: string; telefono: string;
   asunto: string; created_at: string; estado: 'pendiente' | 'en_atencion' | 'atendida';
+  comentario_id: string | null; categoria: string | null; motivo_categoria?: string;
+  analisis: { total_tokens: number; palabras_clave: string[] } | null;
 }
 const estados = { pendiente: 'Pendiente', en_atencion: 'En atención', atendida: 'Atendida' };
 
@@ -46,6 +49,7 @@ export default function Consultas() {
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 20, flexWrap: 'wrap' }}><div><span className="eyebrow">CONSULTA #{item.id} · {new Date(item.created_at).toLocaleString('es-PE')}</span><h3 style={{ margin: '8px 0' }}>{item.nombre}</h3><p style={{ margin: '0 0 12px' }}>{item.empresa || 'Sin empresa indicada'}</p></div><label>Estado <select aria-label={`Estado de consulta ${item.id}`} className="field" style={{ marginLeft: 8 }} disabled={saving !== null} value={item.estado} onChange={event => changeStatus(item, event.target.value)}>{Object.entries(estados).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label></div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20, overflowWrap: 'anywhere' }}><a href={`mailto:${item.correo}`}>{item.correo}</a><span>{item.telefono || 'Sin teléfono indicado'}</span></div>
       <p style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', lineHeight: 1.7, borderTop: '1px solid #e5eaf1', paddingTop: 16 }}>{item.asunto}</p>
+      <ClasificacionMensaje categoria={item.categoria} motivo={item.motivo_categoria} analisis={item.analisis} />
     </article>)}
     <nav aria-label="Páginas de consultas" style={{ display: 'flex', gap: 16, alignItems: 'center' }}><button className="primary-btn" disabled={loading || saving !== null || offset === 0} onClick={() => setOffset(value => Math.max(0, value - 20))}>Anterior</button><span>Página {offset / 20 + 1}</span><button className="primary-btn" disabled={loading || saving !== null || items.length < 20} onClick={() => setOffset(value => value + 20)}>Siguiente</button></nav>
   </div>;

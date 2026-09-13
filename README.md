@@ -40,9 +40,9 @@ Las migraciones `database/NNN_schema.sql` se aplican en orden, con transacción,
 - `POST /api/comentarios`: `cliente_id` o `cliente_nombre`, `fecha` (YYYY-MM-DD), `comentario` y `tiempo_atencion_minutos` positivo con hasta dos decimales. Guarda comentario y tiempo en una sola transacción; devuelve 201 después del commit.
 - `GET /api/comentarios?fecha=2026-09-05&cliente_id=1`: historial filtrado.
 
-Los formularios actuales usan el nombre: reutilizan una coincidencia exacta ignorando mayúsculas, o crean un cliente si no existe. Si hay homónimos devuelven 409; la API permite seleccionar por ID. No se asigna sentimiento ni categoría artificial al registrar. La selección por ID en formularios y edición de clientes queda para gestión operativa posterior.
+Los formularios actuales usan el nombre: reutilizan una coincidencia exacta ignorando mayúsculas, o crean un cliente si no existe. Si hay homónimos devuelven 409; la API permite seleccionar por ID. La categoría se asigna automáticamente mediante las reglas de palabras clave del proyecto; no se calcula sentimiento. La selección por ID en formularios y edición de clientes queda para gestión operativa posterior.
 
-Modelo: clientes 1:N comentarios; comentarios 1:1 tiempos_atencion; cada tiempo pertenece al mismo cliente de su comentario. Fechas corresponden al día de atención y se guardan como DATE; created_at conserva la fecha técnica con zona horaria.
+Modelo: clientes 1:N comentarios; comentarios 1:0..1 tiempos_atencion; cada tiempo pertenece al mismo cliente de su comentario. Fechas corresponden al día de atención y se guardan como DATE; created_at conserva la fecha técnica con zona horaria.
 
 ## Verificación
 
@@ -58,7 +58,7 @@ Frontend: `npm run typecheck`, `node --test tests/http.test.mjs`, `npm run build
 
 Backend: instala `pytest httpx`, configura `TEST_DATABASE_URL` hacia una base de pruebas PostgreSQL y ejecuta `python -m pytest tests -q` desde `backend`. Cada prueba crea y elimina solo un esquema propio con nombre aleatorio. Comprueba persistencia desde otro proceso, filtros, relaciones, validación y rollback.
 
-La autenticación, roles, análisis integrado y preparación de producción siguen pendientes. Usa esta etapa en desarrollo local.
+El panel requiere autenticación. Usa esta configuración de arranque en desarrollo local.
 
 La bandeja de consultas requiere sesión JWT; el formulario de la landing permanece público. Prueba de persistencia: `python -m pytest tests/test_contacto_persistence.py -q` con `TEST_DATABASE_URL`; utiliza un esquema aislado y no deja consultas de prueba en la bandeja real.
 
@@ -71,3 +71,32 @@ El panel ahora requiere login en `/login`. Los usuarios se almacenan en la base 
 `Start-Local.ps1 -RestartApi` aplica migraciones y reinicia únicamente la API de este proyecto. Genera y conserva una clave JWT local en `.local/database.json`. Las migraciones locales de contacto pasaron a 009/010: el migrador reconoce sus checksums originales y actualiza el registro dentro de la misma transacción, sin recrear tablas ni eliminar consultas. Las migraciones remotas 004–008 conservan su contenido original.
 
 Se conserva el respaldo Git en `codex/respaldo-contacto-local` y una copia PostgreSQL previa en `.local/backups/pre-integracion-d07aae2.dump`. No se publicó ni se enviaron cambios a GitHub.
+
+
+## Contacto público integrado con el panel
+
+Tras aplicar `011_schema.sql`, ambos formularios públicos (`POST /api/contacto` y
+`POST /api/landing/contacto`) comparten el mismo flujo transaccional: crear un
+cliente potencial, clasificar y registrar su comentario, guardar el análisis
+NLTK y vincularlo con Consultas web. Ambos aceptan nombre, correo, empresa y
+telefono opcionales, y asunto de 10 a 5000 caracteres. Nombre y correo son obligatorios.
+Cada envío crea un cliente potencial; un correo público no verificado no permite
+modificar o fusionar automáticamente un cliente existente.
+
+Los mensajes nuevos aparecen en Consultas web, Solicitudes y Reportes. La antigua
+pantalla de registro manual de Comentarios se retiró; `/comentarios` redirige a
+`/consultas`. El análisis individual continúa en Inteligencia NLP. Consultas web
+muestra categoría y palabras clave. Su estado se sincroniza con el comentario:
+pendiente → pendiente, en_atencion → en_atencion, atendida → resuelto, también al
+resolver desde Solicitudes. No se crean tiempos de atención sin una medición real.
+Para integrar consultas anteriores, ejecutar desde backend `python -m app.services.integrar_consultas`
+tras aplicar migraciones. Conserva fecha y estado, vincula el comentario y guarda su
+análisis en una transacción. Se puede repetir sin duplicar registros. Las tarjetas
+de Consultas web y Solicitudes muestran categoría, motivo y análisis disponible.
+
+El análisis usa las reglas existentes para ventas/soporte/reclamo y NLTK para
+extraer tokens y palabras clave. Requiere los recursos `punkt_tab` y `stopwords`;
+en el entorno Python del backend se instalan con
+`python -m nltk.downloader punkt_tab stopwords`. Si faltan, el envío devuelve 503
+sin guardar registros parciales. Para activar localmente una actualización:
+`powershell -ExecutionPolicy Bypass -File .\Start-Local.ps1 -RestartApi`.

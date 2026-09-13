@@ -25,7 +25,9 @@ def test_contact_commits_before_confirming(contact_api):
     })
     assert response.status_code == 201
     assert response.json()['id'] == '12'
-    assert db.execute.call_args.args[1] == (
+    insert = next(call for call in db.execute.call_args_list
+                  if 'INSERT INTO consultas_contacto' in call.args[0])
+    assert insert.args[1][:5] == (
         'Ana', '', 'ana@example.com', '', 'Necesito una cotización de software.')
     db.commit.assert_called_once()
 

@@ -17,10 +17,10 @@ def clasificar_texto(texto: str) -> tuple[str, float]:
 
 
 def analizar_texto(texto: str) -> dict:
-    """Desglose de un solo texto: total de tokens y sus palabras clave (sin stopwords)."""
+    """Desglose de un solo texto: total de tokens y sus palabras clave predefinidas."""
     tokens = word_tokenize(texto.lower(), language="spanish")
-    stop = set(stopwords.words("spanish"))
-    palabras_clave = sorted({t for t in tokens if t.isalpha() and t not in stop})
+    palabras_permitidas = set(PALABRAS_RECLAMO + PALABRAS_VENTAS + PALABRAS_SOPORTE)
+    palabras_clave = sorted({t for t in tokens if t in palabras_permitidas})
     return {"total_tokens": len(tokens), "palabras_clave": palabras_clave}
 
 
@@ -34,3 +34,13 @@ def palabras_frecuentes(textos: list[str], top: int = 7) -> list[dict]:
     limpios = [t for t in tokens if t.isalpha() and t not in stop]
     frecuentes = Counter(limpios).most_common(top)
     return [{"palabra": pal, "frecuencia": frec} for pal, frec in frecuentes]
+
+def explicar_categoria(texto: str, categoria: str | None) -> str:
+    actual, _ = clasificar_texto(texto)
+    if categoria != actual:
+        return 'Categoría guardada en el registro.'
+    reglas = PALABRAS_RECLAMO if actual == 'reclamo' else PALABRAS_VENTAS if actual == 'ventas' else PALABRAS_SOPORTE if actual == 'soporte' else []
+    coincidencias = [p for p in reglas if p in texto.lower()]
+    if coincidencias:
+        return f'Coincidencia con palabras clave: {", ".join(coincidencias)}.'
+    return 'Categoría Soporte asignada por defecto.'
